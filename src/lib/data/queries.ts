@@ -145,6 +145,7 @@ export async function getRecentImports(limit = 6) {
     .from("recipes")
     .select("id, title, image_url, created_at, favorite, rating")
     .eq("user_id", user.id)
+    .is("hidden_from_recent_at", null)
     .order("created_at", { ascending: false })
     .limit(limit);
 

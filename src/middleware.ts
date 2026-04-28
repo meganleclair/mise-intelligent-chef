@@ -30,17 +30,6 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
-  const isPublic =
-    pathname === "/login" ||
-    pathname.startsWith("/auth/callback") ||
-    pathname === "/auth/update-password";
-
-  if (!user && !isPublic) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/login";
-    redirectUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(redirectUrl);
-  }
 
   if (user && pathname === "/login") {
     const home = request.nextUrl.clone();

@@ -1,14 +1,21 @@
 import Link from "next/link";
 import { ContinueCookingBanner } from "@/components/continue-cooking-banner";
 import { DeleteRecipeButton } from "@/components/delete-recipe-button";
+import { RemoveFromRecentButton } from "@/components/remove-from-recent-button";
 import { StarRatingDisplay } from "@/components/star-rating";
 import {
   getActiveCookSession,
   getFavoriteRecipes,
   getRecentImports,
 } from "@/lib/data/queries";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function KitchenPage() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const [active, recent, favorites] = await Promise.all([
     getActiveCookSession(),
     getRecentImports(8),
@@ -23,6 +30,18 @@ export default async function KitchenPage() {
           A quiet shelf for what you&apos;re cooking—not a crowded dashboard.
         </p>
       </header>
+
+      {user ? null : (
+        <p className="mb-10 rounded-md border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+          <Link
+            href="/login?next=/kitchen"
+            className="font-medium text-text-heading underline underline-offset-4"
+          >
+            Sign in
+          </Link>{" "}
+          to see imported recipes and favorites here.
+        </p>
+      )}
 
       {active ? (
         <ContinueCookingBanner
@@ -40,7 +59,9 @@ export default async function KitchenPage() {
         </h2>
         {recent.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            Nothing here yet—import a recipe from home.
+            {user
+              ? "Nothing here yet—import a recipe from home."
+              : "Sign in to load recipes you’ve imported."}
           </p>
         ) : (
           <ul className="divide-y divide-border border border-border">
@@ -63,7 +84,7 @@ export default async function KitchenPage() {
                     ) : null}
                   </div>
                 </Link>
-                <DeleteRecipeButton recipeId={r.id} recipeTitle={r.title} />
+                <RemoveFromRecentButton recipeId={r.id} recipeTitle={r.title} />
               </li>
             ))}
           </ul>

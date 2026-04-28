@@ -17,7 +17,7 @@ export function splitStepForDisplay(text: string): string[] {
     return bySentence;
   }
 
-  if (raw.length > 200 && raw.includes(";")) {
+  if (raw.length > 90 && raw.includes(";")) {
     const byClause = raw
       .split(/\s*;\s*/)
       .map((s) => s.trim())

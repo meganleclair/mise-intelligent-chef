@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,8 +12,22 @@ type Props = { nextPath: string };
 
 type Mode = "signin" | "signup" | "forgot";
 
+/** Clearer copy for common Supabase Auth responses (designer-friendly). */
+function friendlyAuthError(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes("email not confirmed") || m.includes("not confirmed")) {
+    return "This email isn’t confirmed yet. Open the confirmation message Supabase sent you (check spam), click the link, then sign in here.";
+  }
+  if (m.includes("invalid login credentials") || m.includes("invalid_credentials")) {
+    return "That email or password doesn’t match an account. Try again, or use “Create an account” / “Forgot password”.";
+  }
+  if (m.includes("already registered") || m.includes("user already")) {
+    return "That email already has an account. Sign in instead, or use Forgot password.";
+  }
+  return message;
+}
+
 export function LoginForm({ nextPath }: Props) {
-  const router = useRouter();
   const [mode, setMode] = useState<Mode>("signin");
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
@@ -29,18 +42,24 @@ export function LoginForm({ nextPath }: Props) {
     const password = String(fd.get("password") ?? "");
     if (!email || !password) return;
     setPending(true);
-    const supabase = createSupabaseBrowserClient();
-    const { error: err } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    setPending(false);
-    if (err) {
-      setError(err.message);
-      return;
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { error: err } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (err) {
+        setPending(false);
+        setError(friendlyAuthError(err.message));
+        return;
+      }
+      // Full page load so auth cookies are definitely sent to the server.
+      // Client router navigation can race cookie sync and stall/hang with middleware + RSC.
+      window.location.assign(nextPath);
+    } catch (caught) {
+      setPending(false);
+      setError(caught instanceof Error ? caught.message : "Something went wrong.");
     }
-    router.push(nextPath);
-    router.refresh();
   }
 
   async function signUp(e: React.FormEvent<HTMLFormElement>) {
@@ -61,28 +80,33 @@ export function LoginForm({ nextPath }: Props) {
       return;
     }
     setPending(true);
-    const supabase = createSupabaseBrowserClient();
-    const origin = window.location.origin;
-    const { data, error: err } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
-      },
-    });
-    setPending(false);
-    if (err) {
-      setError(err.message);
-      return;
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const origin = window.location.origin;
+      const { data, error: err } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+        },
+      });
+      if (err) {
+        setPending(false);
+        setError(friendlyAuthError(err.message));
+        return;
+      }
+      if (data.session) {
+        window.location.assign(nextPath);
+        return;
+      }
+      setPending(false);
+      setInfo(
+        "We created your account, but Supabase still needs you to confirm your email before you can sign in. Check your inbox and spam for a message with a confirmation link. After you click it, come back here and sign in.",
+      );
+    } catch (caught) {
+      setPending(false);
+      setError(caught instanceof Error ? caught.message : "Something went wrong.");
     }
-    if (data.session) {
-      router.push(nextPath);
-      router.refresh();
-      return;
-    }
-    setInfo(
-      "Check your email to confirm your account, then sign in here.",
-    );
   }
 
   async function forgot(e: React.FormEvent<HTMLFormElement>) {
@@ -93,19 +117,24 @@ export function LoginForm({ nextPath }: Props) {
     const email = String(fd.get("email") ?? "").trim();
     if (!email) return;
     setPending(true);
-    const supabase = createSupabaseBrowserClient();
-    const origin = window.location.origin;
-    const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/auth/update-password")}`,
-    });
-    setPending(false);
-    if (err) {
-      setError(err.message);
-      return;
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const origin = window.location.origin;
+      const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/auth/update-password")}`,
+      });
+      setPending(false);
+      if (err) {
+        setError(friendlyAuthError(err.message));
+        return;
+      }
+      setInfo(
+        "If an account exists for that email, you’ll get a link to reset your password.",
+      );
+    } catch (caught) {
+      setPending(false);
+      setError(caught instanceof Error ? caught.message : "Something went wrong.");
     }
-    setInfo(
-      "If an account exists for that email, you’ll get a link to reset your password.",
-    );
   }
 
   if (mode === "forgot") {

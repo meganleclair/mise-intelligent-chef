@@ -1,5 +1,65 @@
 import { decodeHtmlEntities } from "@/lib/decode-html-entities";
+import { isBatchShiftNote } from "@/lib/swap-catalog";
 import type { Ingredient } from "@/lib/types/recipe";
+
+/**
+ * True when this line was swapped by hand (catalog picker), not by batch recipe shifts.
+ */
+export function isManualIngredientSwap(note?: string | null): boolean {
+  const raw = note?.trim();
+  if (!raw?.startsWith("Swap:")) return false;
+  const body = raw.slice("Swap:".length).trim();
+  return !isBatchShiftNote(body);
+}
+
+/** Quantity + unit + name only (replacement line after a swap). */
+export function getIngredientPrimaryLine(ing: Ingredient): string {
+  const qty = ing.quantity?.trim();
+  const unit = ing.unit?.trim();
+  const unitLower = unit?.toLowerCase() ?? "";
+  const name = (ing.name || "").trim();
+
+  // Legacy bad parses: amount + unit "to" + empty name (Spoonacular range bug). Re-import fixes it.
+  if (unitLower === "to" && !name && qty) {
+    return decodeHtmlEntities(
+      `Amount unclear (${qty} …). Re-import this recipe from home to refresh the full line.`,
+    );
+  }
+
+  const structured = [qty, unit, name]
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return decodeHtmlEntities(structured || name);
+}
+
+/** Parses `mergeIngredientsWithMods` notes like `Swap: [Lower calorie shift] …`. */
+export function parseSwapNote(note?: string | null): {
+  shift?: string;
+  detail: string;
+} | null {
+  const raw = note?.trim();
+  if (!raw || !raw.startsWith("Swap:")) return null;
+  let body = raw.slice("Swap:".length).trim();
+  let shift: string | undefined;
+  const bracket = body.match(
+    /^\[(Higher protein|Lower calorie|Lower carb|Higher fiber|Lower sodium|Dairy-free) shift\]\s*/i,
+  );
+  if (bracket) {
+    const g = bracket[1]!.toLowerCase();
+    if (g === "higher protein") shift = "Higher protein";
+    else if (g === "lower calorie") shift = "Lower calorie";
+    else if (g === "lower carb") shift = "Lower carb";
+    else if (g === "higher fiber") shift = "Higher fiber";
+    else if (g === "lower sodium") shift = "Lower sodium";
+    else if (g === "dairy-free") shift = "Dairy-free";
+    body = body.slice(bracket[0].length).trim();
+  }
+  if (!body) return null;
+  return { shift, detail: body };
+}
 
 /**
  * One readable line for an ingredient: avoids duplicating Spoonacular-style

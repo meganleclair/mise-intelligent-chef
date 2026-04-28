@@ -19,9 +19,16 @@ type Props = {
   recipeId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** When set, skip saving—navigate here after Done (e.g. browse-only cook). */
+  demoReturnHref?: string;
 };
 
-export function CookFinishDialog({ recipeId, open, onOpenChange }: Props) {
+export function CookFinishDialog({
+  recipeId,
+  open,
+  onOpenChange,
+  demoReturnHref,
+}: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [saveToKitchen, setSaveToKitchen] = useState(true);
@@ -38,6 +45,11 @@ export function CookFinishDialog({ recipeId, open, onOpenChange }: Props) {
   }
 
   function submit() {
+    if (demoReturnHref) {
+      handleOpenChange(false);
+      router.push(demoReturnHref);
+      return;
+    }
     setError(null);
     startTransition(async () => {
       const result = await finishCookingWithFeedback(recipeId, {
@@ -59,38 +71,53 @@ export function CookFinishDialog({ recipeId, open, onOpenChange }: Props) {
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
           <DialogTitle className="font-serif text-xl text-text-heading">
-            You did it
+            {demoReturnHref ? "Nice work" : "You did it"}
           </DialogTitle>
           <DialogDescription>
-            Save this one to My Kitchen and note how it turned out—both are
-            optional.
+            {demoReturnHref ? (
+              <>
+                You&apos;re all set. Head back to the recipe anytime—that&apos;s where
+                notes and prep live.
+              </>
+            ) : (
+              <>
+                Save this one to My Kitchen and note how it turned out—both are
+                optional.
+              </>
+            )}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-2">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-text-heading">
-              How was it?
-            </p>
-            <StarRatingInput value={rating} onChange={setRating} idPrefix="cook-rate" />
-            <p className="text-xs text-muted-foreground">
-              Tap a star to rate; tap again to clear.
-            </p>
-          </div>
+        {demoReturnHref ? null : (
+          <div className="space-y-6 py-2">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-text-heading">
+                How was it?
+              </p>
+              <StarRatingInput
+                value={rating}
+                onChange={setRating}
+                idPrefix="cook-rate"
+              />
+              <p className="text-xs text-muted-foreground">
+                Tap a star to rate; tap again to clear.
+              </p>
+            </div>
 
-          <div className="flex items-start gap-3">
-            <Checkbox
-              id="save-kitchen"
-              checked={saveToKitchen}
-              onCheckedChange={(checked) =>
-                setSaveToKitchen(checked === true)
-              }
-            />
-            <Label htmlFor="save-kitchen" className="font-normal leading-snug">
-              Save to My Kitchen
-            </Label>
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="save-kitchen"
+                checked={saveToKitchen}
+                onCheckedChange={(checked) =>
+                  setSaveToKitchen(checked === true)
+                }
+              />
+              <Label htmlFor="save-kitchen" className="font-normal leading-snug">
+                Save to My Kitchen
+              </Label>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex flex-col gap-2 border-t border-border pt-4">
           {error ? (
@@ -105,7 +132,7 @@ export function CookFinishDialog({ recipeId, open, onOpenChange }: Props) {
             disabled={pending}
             onClick={submit}
           >
-            {pending ? "Saving…" : "Done"}
+            {pending ? "Saving…" : demoReturnHref ? "Back to recipe" : "Done"}
           </Button>
         </div>
       </DialogContent>

@@ -3,12 +3,15 @@ import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/components/favorite-button";
 import { RecipeRatingSection } from "@/components/recipe-rating-section";
 import { IngredientSwapSheet } from "@/components/ingredient-swap-sheet";
-import {
-  formatIngredientLine,
-  mergeIngredientsWithMods,
-} from "@/lib/recipes/display";
+import { RecipeGoalSwaps } from "@/components/recipe-goal-swaps";
+import { RecipeStepsReader } from "@/components/recipe-steps-reader";
+import { mergeIngredientsWithMods } from "@/lib/recipes/display";
+import { IngredientLine } from "@/components/ingredient-line";
 import { decodeHtmlEntities } from "@/lib/decode-html-entities";
+import { tidyRecipeSummaryForDisplay } from "@/lib/recipes/summary";
 import { getModifications, getRecipeForUser } from "@/lib/data/queries";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { SignInPrompt } from "@/components/sign-in-prompt";
 import { RecipeImageFallback } from "@/components/recipe-image-fallback";
 import { normalizeImageUrl } from "@/lib/images";
 import { buttonVariants } from "@/components/ui/button";
@@ -18,14 +21,19 @@ type Props = { params: Promise<{ id: string }> };
 
 export default async function RecipeDetailPage({ params }: Props) {
   const { id } = await params;
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return <SignInPrompt nextPath={`/recipes/${id}`} />;
+  }
+
   const recipe = await getRecipeForUser(id);
   if (!recipe) notFound();
 
   const mods = await getModifications(id);
   const ingredients = mergeIngredientsWithMods(recipe.ingredients, mods);
-  const stepsPreview = [...recipe.steps]
-    .sort((a, b) => a.order - b.order)
-    .slice(0, 3);
 
   const heroSrc = recipe.image_url
     ? normalizeImageUrl(recipe.image_url)
@@ -52,8 +60,8 @@ export default async function RecipeDetailPage({ params }: Props) {
           {decodeHtmlEntities(recipe.title)}
         </h1>
         {recipe.summary ? (
-          <p className="text-lg leading-relaxed text-muted-foreground">
-            {decodeHtmlEntities(recipe.summary)}
+          <p className="break-words text-lg leading-relaxed text-muted-foreground">
+            {decodeHtmlEntities(tidyRecipeSummaryForDisplay(recipe.summary))}
           </p>
         ) : null}
         <div className="flex flex-wrap items-center gap-3">
@@ -87,9 +95,9 @@ export default async function RecipeDetailPage({ params }: Props) {
         <ul className="space-y-3 text-base leading-relaxed">
           {ingredients.map((ing) => (
             <li key={ing.id} className="flex items-start gap-3">
-              <span className="min-w-0 flex-1 break-words">
-                {formatIngredientLine(ing)}
-              </span>
+              <div className="min-w-0 flex-1">
+                <IngredientLine ingredient={ing} />
+              </div>
               <div className="shrink-0 pt-0.5">
                 <IngredientSwapSheet recipeId={id} ingredient={ing} />
               </div>
@@ -98,21 +106,18 @@ export default async function RecipeDetailPage({ params }: Props) {
         </ul>
       </section>
 
-      <section className="mt-12 space-y-4">
-        <h2 className="font-serif text-2xl text-text-heading">Steps</h2>
-        <ol className="list-decimal space-y-4 pl-5 text-base leading-relaxed marker:text-muted-foreground">
-          {stepsPreview.map((s) => (
-            <li key={s.id} className="pl-1">
-              {decodeHtmlEntities(s.text)}
-            </li>
-          ))}
-        </ol>
-        {recipe.steps.length > 3 ? (
+      <div className="mt-12 space-y-12">
+        <RecipeGoalSwaps recipeId={id} />
+
+        <section className="space-y-4">
+          <h2 className="font-serif text-2xl text-text-heading">Instructions</h2>
           <p className="text-sm text-muted-foreground">
-            + {recipe.steps.length - 3} more in cook mode
+            Full steps—same flow you&apos;ll see in cook mode, without splitting one
+            screen at a time.
           </p>
-        ) : null}
-      </section>
+          <RecipeStepsReader steps={recipe.steps} />
+        </section>
+      </div>
 
       <div className="mt-14 flex flex-col gap-3 sm:flex-row">
         <Link

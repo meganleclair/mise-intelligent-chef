@@ -137,6 +137,43 @@ export async function setRecipeFavorite(recipeId: string, favorite: boolean) {
   return { ok: true as const };
 }
 
+/** Stops showing the recipe on “Recently imported” (home + kitchen). Does not delete it. */
+export async function dismissRecipeFromRecentImports(recipeId: string) {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false as const, error: "Sign in required." };
+  }
+
+  const id = recipeId.trim();
+  if (!id) {
+    return { ok: false as const, error: "Missing recipe." };
+  }
+
+  const { data, error } = await supabase
+    .from("recipes")
+    .update({ hidden_from_recent_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .select("id");
+
+  if (error) {
+    return { ok: false as const, error: error.message };
+  }
+  if (!data?.length) {
+    return {
+      ok: false as const,
+      error: "Couldn’t update that recipe. Try refreshing the page.",
+    };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/kitchen");
+  return { ok: true as const };
+}
+
 export async function deleteRecipe(recipeId: string) {
   const supabase = await createSupabaseServerClient();
   const {

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PrepEditor } from "@/components/prep-editor";
+import { SignInPrompt } from "@/components/sign-in-prompt";
 import { getRecipeForUser } from "@/lib/data/queries";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +11,19 @@ type Props = { params: Promise<{ id: string }> };
 
 export default async function PrepPage({ params }: Props) {
   const { id } = await params;
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return (
+      <SignInPrompt
+        nextPath={`/recipes/${id}/prep`}
+        description="Sign in to edit prep for your saved recipes."
+      />
+    );
+  }
+
   const recipe = await getRecipeForUser(id);
   if (!recipe) notFound();
 

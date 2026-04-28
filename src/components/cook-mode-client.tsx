@@ -15,7 +15,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { IngredientSwapSheet } from "@/components/ingredient-swap-sheet";
 import { decodeHtmlEntities } from "@/lib/decode-html-entities";
-import { formatIngredientLine } from "@/lib/recipes/display";
+import { IngredientLine } from "@/components/ingredient-line";
 import { getIngredientsForStep } from "@/lib/recipes/step-ingredients";
 import { splitStepForDisplay } from "@/lib/recipes/split-step-display";
 
@@ -26,6 +26,8 @@ type Props = {
   ingredients: Ingredient[];
   initialStepIndex: number;
   initialTimer: TimerState;
+  /** Local-only cook mode: no session sync; exit & finish use this path. */
+  demoExitHref?: string;
 };
 
 function formatRemaining(seconds: number) {
@@ -50,7 +52,9 @@ export function CookModeClient({
   ingredients,
   initialStepIndex,
   initialTimer,
+  demoExitHref,
 }: Props) {
+  const isDemo = Boolean(demoExitHref);
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [finishOpen, setFinishOpen] = useState(false);
@@ -83,6 +87,9 @@ export function CookModeClient({
       if (sec <= 0) {
         clearInterval(id);
         setTimer(null);
+        if (isDemo) {
+          return;
+        }
         startTransition(async () => {
           await updateCookTimer(recipeId, null);
           router.refresh();
@@ -92,14 +99,15 @@ export function CookModeClient({
     const id = window.setInterval(tick, 1000);
     tick();
     return () => window.clearInterval(id);
-  }, [timer, recipeId, router]);
+  }, [timer, recipeId, router, isDemo]);
 
 
   useEffect(() => {
+    if (isDemo) return;
     startTransition(async () => {
       await startOrResumeCookSession(recipeId);
     });
-  }, [recipeId]);
+  }, [recipeId, isDemo]);
 
   const current = orderedSteps[stepIndex];
   const stepText = decodeHtmlEntities(current?.text ?? "");
@@ -120,6 +128,7 @@ export function CookModeClient({
       Math.max(0, stepIndex + delta),
     );
     setStepIndex(next);
+    if (isDemo) return;
     startTransition(async () => {
       await updateCookStep(recipeId, next);
       router.refresh();
@@ -136,6 +145,7 @@ export function CookModeClient({
     };
     setTimer(next);
     setRemainingSec(minutes * 60);
+    if (isDemo) return;
     startTransition(async () => {
       await updateCookTimer(recipeId, next);
       router.refresh();
@@ -145,6 +155,7 @@ export function CookModeClient({
   function clearTimer() {
     setTimer(null);
     setRemainingSec(0);
+    if (isDemo) return;
     startTransition(async () => {
       await updateCookTimer(recipeId, null);
       router.refresh();
@@ -161,7 +172,7 @@ export function CookModeClient({
           <h1 className="truncate font-serif text-lg text-text-heading">{title}</h1>
         </div>
         <Link
-          href={`/recipes/${recipeId}`}
+          href={demoExitHref ?? `/recipes/${recipeId}`}
           className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
         >
           Exit
@@ -176,7 +187,7 @@ export function CookModeClient({
         <div className="mx-auto mt-8 w-full max-w-xl flex-1">
           {stepParts.length > 1 ? (
             <ol
-              className="list-decimal space-y-4 pl-5 font-serif text-xl leading-relaxed text-text-heading sm:text-2xl [&>li]:pl-2"
+              className="list-decimal space-y-4 pl-5 font-serif text-xl leading-relaxed text-text-heading sm:text-2xl [&>li]:whitespace-pre-wrap [&>li]:break-words [&>li]:pl-2"
               aria-label="Instructions for this step"
             >
               {stepParts.map((part, i) => (
@@ -184,7 +195,7 @@ export function CookModeClient({
               ))}
             </ol>
           ) : (
-            <p className="font-serif text-2xl leading-snug text-text-heading sm:text-3xl">
+            <p className="font-serif text-2xl leading-relaxed whitespace-pre-wrap break-words text-text-heading sm:text-3xl">
               {stepParts[0] ?? ""}
             </p>
           )}
@@ -204,12 +215,17 @@ export function CookModeClient({
             <ul className="space-y-2 text-base leading-relaxed">
               {stepIngredients.map((ing) => (
                 <li key={ing.id} className="flex items-start gap-3">
-                  <span className="min-w-0 flex-1 break-words">
-                    {formatIngredientLine(ing)}
-                  </span>
-                  <div className="shrink-0 pt-0.5">
-                    <IngredientSwapSheet recipeId={recipeId} ingredient={ing} />
+                  <div className="min-w-0 flex-1">
+                    <IngredientLine ingredient={ing} />
                   </div>
+                  {isDemo ? null : (
+                    <div className="shrink-0 pt-0.5">
+                      <IngredientSwapSheet
+                        recipeId={recipeId}
+                        ingredient={ing}
+                      />
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
@@ -306,6 +322,7 @@ export function CookModeClient({
         recipeId={recipeId}
         open={finishOpen}
         onOpenChange={setFinishOpen}
+        demoReturnHref={demoExitHref}
       />
     </div>
   );

@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { ContinueCookingBanner } from "@/components/continue-cooking-banner";
 import { ImportRecipeForm } from "@/components/import-recipe-form";
 import { RecentImportsCards } from "@/components/recent-imports-cards";
@@ -8,11 +7,11 @@ import {
   getFeaturedRecipe,
   getRecentImports,
 } from "@/lib/data/queries";
-import { RecipeImageFallback } from "@/components/recipe-image-fallback";
-import { decodeHtmlEntities } from "@/lib/decode-html-entities";
-import { normalizeImageUrl } from "@/lib/images";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { GetStartedDemoCards } from "@/components/get-started-demo-cards";
+
+/** Home hero (pick one): unsplash.com/photos/d9jcPTRD9fo • MqT0asuoIcU • pHeX8H9WQpY */
+const HOME_HERO_IMAGE =
+  "https://images.unsplash.com/photo-1611270629569-8b357cb88da9?auto=format&fit=crop&w=2560&q=90";
 
 export default async function HomePage() {
   const [featured, active, recentAll] = await Promise.all([
@@ -24,10 +23,6 @@ export default async function HomePage() {
   const recentForCards = recentAll
     .filter((r) => !featured || r.id !== featured.id)
     .slice(0, 6);
-
-  const featuredImageSrc = featured?.image_url
-    ? normalizeImageUrl(featured.image_url)
-    : null;
 
   return (
     <div className="mx-auto max-w-5xl px-6 pb-20 pt-10">
@@ -59,47 +54,34 @@ export default async function HomePage() {
           </div>
         </div>
         <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm bg-muted">
-          {featuredImageSrc ? (
-            <RecipeImageFallback
-              src={featuredImageSrc}
-              className="absolute inset-0 h-full w-full"
-              loading="eager"
-              size="lg"
-            />
-          ) : (
-            <Image
-              src="/images/home-hero-default.jpg"
-              alt=""
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 1024px) 100vw, 40vw"
-            />
-          )}
-          {featured ? (
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
-              <p className="font-serif text-xl">
-                {decodeHtmlEntities(featured.title)}
-              </p>
-              <Link
-                href={`/recipes/${featured.id}`}
-                className={cn(
-                  buttonVariants({ variant: "secondary" }),
-                  "mt-3 inline-flex",
-                )}
-              >
-                Open recipe
-              </Link>
-            </div>
-          ) : (
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 to-transparent p-6">
-              <p className="text-center text-sm leading-relaxed text-white/95">
-                Your imported recipes will feel like this—room to breathe, easy to
-                follow.
-              </p>
-            </div>
-          )}
+          <Image
+            src={HOME_HERO_IMAGE}
+            alt=""
+            fill
+            className="object-cover"
+            priority
+            quality={92}
+            sizes="(max-width: 1024px) 100vw, min(528px, 42vw)"
+          />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 to-transparent p-6">
+            <p className="text-center text-sm leading-relaxed text-white/95">
+              Room to breathe—clear steps when you&apos;re ready to cook.
+            </p>
+          </div>
         </div>
+      </section>
+
+      <section className="mt-20 border-t border-border pt-14">
+        <div className="mb-8 space-y-2">
+          <h2 className="font-serif text-2xl text-text-heading">
+            Try a recipe
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            No upload needed—open a full recipe and jump into prep or cook mode whenever
+            you like.
+          </p>
+        </div>
+        <GetStartedDemoCards />
       </section>
 
       <section className="mt-20 border-t border-border pt-14">

@@ -3,11 +3,15 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightLeft } from "@fortawesome/free-solid-svg-icons";
+import { faRightLeft, faRotateLeft } from "@fortawesome/free-solid-svg-icons";
 import type { Ingredient } from "@/lib/types/recipe";
-import { applyIngredientSwap } from "@/lib/actions/swaps";
+import {
+  applyIngredientSwap,
+  clearIngredientSwap,
+} from "@/lib/actions/swaps";
 import { decodeHtmlEntities } from "@/lib/decode-html-entities";
 import { getSwapOptionsForIngredient } from "@/lib/swap-catalog";
+import { isManualIngredientSwap } from "@/lib/recipes/display";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,11 +20,54 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 type Props = {
   recipeId: string;
   ingredient: Ingredient;
 };
+
+function ManualSwapReset({ recipeId, ingredient }: Props) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  function reset() {
+    setError(null);
+    startTransition(async () => {
+      const res = await clearIngredientSwap(recipeId, ingredient.id);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      router.refresh();
+    });
+  }
+
+  return (
+    <div className="flex shrink-0 flex-col items-end gap-1">
+      <Button
+        type="button"
+        variant="secondary"
+        size="sm"
+        className={cn(
+          "gap-1.5 border border-border px-2.5 py-1 text-xs font-semibold text-text-heading shadow-sm",
+          "hover:bg-muted/80",
+        )}
+        disabled={pending}
+        onClick={reset}
+      >
+        <FontAwesomeIcon icon={faRotateLeft} className="h-3 w-3 shrink-0" aria-hidden />
+        Reset
+      </Button>
+      {error ? (
+        <span className="max-w-[12rem] text-right text-xs text-destructive" role="alert">
+          {error}
+        </span>
+      ) : null}
+    </div>
+  );
+}
 
 export function IngredientSwapSheet({ recipeId, ingredient }: Props) {
   const router = useRouter();
@@ -32,6 +79,10 @@ export function IngredientSwapSheet({ recipeId, ingredient }: Props) {
     (o) =>
       o.label.trim().toLowerCase() !== ingredient.name.trim().toLowerCase(),
   );
+
+  if (isManualIngredientSwap(ingredient.note)) {
+    return <ManualSwapReset recipeId={recipeId} ingredient={ingredient} />;
+  }
 
   function choose(label: string, impact: string) {
     startTransition(async () => {
