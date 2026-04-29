@@ -37,11 +37,18 @@ export async function importRecipeFromUrl(url: string): Promise<ImportRecipeResu
         recipe: normalizeRecipe(raw, trimmed),
         source: "spoonacular",
       };
-    } catch {
-      /* fall through to mock */
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Unknown error from recipe API.";
+      console.error("[importRecipe] Spoonacular failed:", message);
+      return {
+        ok: false,
+        error: `Couldn't import that recipe (${message}). Try a different URL, or check that the site is publicly accessible.`,
+      };
     }
   }
 
+  // No API key — return demo recipe so the full flow is still demonstrable
   const mock = await importRecipeMock(trimmed);
   return {
     ok: true,
