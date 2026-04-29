@@ -97,6 +97,7 @@ export function IngredientSwapSheet({
   const [pending, startTransition] = useTransition();
   const [options, setOptions] = useState<SwapOption[]>([]);
   const [loading, setLoading] = useState(false);
+  const [noSwaps, setNoSwaps] = useState(false);
 
   const catalogName = ingredient.swapBasisName ?? ingredient.name;
 
@@ -125,16 +126,32 @@ export function IngredientSwapSheet({
 
         if (aiOptions.length > 0) {
           setOptions(aiOptions);
+          return;
+        }
+
+        // No AI results — fall back to static catalog
+        const catalog = getCatalogOptions(catalogName, ingredient.name);
+        if (catalog.length > 0) {
+          setOptions(catalog);
         } else {
-          // No AI results — fall back to static catalog
-          setOptions(getCatalogOptions(catalogName, ingredient.name));
+          // Nothing from AI or catalog — hide the button
+          setOpen(false);
+          setNoSwaps(true);
         }
       })
       .catch(() => {
-        setOptions(getCatalogOptions(catalogName, ingredient.name));
+        const catalog = getCatalogOptions(catalogName, ingredient.name);
+        if (catalog.length > 0) {
+          setOptions(catalog);
+        } else {
+          setOpen(false);
+          setNoSwaps(true);
+        }
       })
       .finally(() => setLoading(false));
   }, [open, catalogName, ingredient.name, recipeName, allIngredientNames]);
+
+  if (noSwaps) return null;
 
   if (isManualIngredientSwap(ingredient.note)) {
     return <ManualSwapReset recipeId={recipeId} ingredient={ingredient} />;
