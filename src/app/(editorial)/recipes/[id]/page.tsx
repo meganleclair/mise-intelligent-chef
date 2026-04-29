@@ -99,7 +99,12 @@ export default async function RecipeDetailPage({ params }: Props) {
                 <IngredientLine ingredient={ing} />
               </div>
               <div className="shrink-0 pt-0.5">
-                <IngredientSwapSheet recipeId={id} ingredient={ing} />
+                <IngredientSwapSheet
+                  recipeId={id}
+                  ingredient={ing}
+                  recipeName={recipe.title}
+                  allIngredientNames={ingredients.map((i) => i.name)}
+                />
               </div>
             </li>
           ))}

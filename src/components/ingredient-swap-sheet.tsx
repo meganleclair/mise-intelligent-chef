@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRightLeft, faRotateLeft } from "@fortawesome/free-solid-svg-icons";
@@ -22,12 +22,22 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
+type SwapOption = { label: string; impactNote: string };
+
 type Props = {
   recipeId: string;
   ingredient: Ingredient;
+  recipeName?: string;
+  allIngredientNames?: string[];
 };
 
-function ManualSwapReset({ recipeId, ingredient }: Props) {
+function ManualSwapReset({
+  recipeId,
+  ingredient,
+}: {
+  recipeId: string;
+  ingredient: Ingredient;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -52,16 +62,23 @@ function ManualSwapReset({ recipeId, ingredient }: Props) {
         size="sm"
         className={cn(
           "gap-1.5 border border-border px-2.5 py-1 text-xs font-semibold text-text-heading shadow-sm",
-          "hover:bg-muted/80",
+          "hover:bg-muted/80"
         )}
         disabled={pending}
         onClick={reset}
       >
-        <FontAwesomeIcon icon={faRotateLeft} className="h-3 w-3 shrink-0" aria-hidden />
+        <FontAwesomeIcon
+          icon={faRotateLeft}
+          className="h-3 w-3 shrink-0"
+          aria-hidden
+        />
         Reset
       </Button>
       {error ? (
-        <span className="max-w-[12rem] text-right text-xs text-destructive" role="alert">
+        <span
+          className="max-w-[12rem] text-right text-xs text-destructive"
+          role="alert"
+        >
           {error}
         </span>
       ) : null}
@@ -69,16 +86,55 @@ function ManualSwapReset({ recipeId, ingredient }: Props) {
   );
 }
 
-export function IngredientSwapSheet({ recipeId, ingredient }: Props) {
+export function IngredientSwapSheet({
+  recipeId,
+  ingredient,
+  recipeName,
+  allIngredientNames,
+}: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [options, setOptions] = useState<SwapOption[]>([]);
+  const [loading, setLoading] = useState(false);
+
   const catalogName = ingredient.swapBasisName ?? ingredient.name;
-  const allCatalogOptions = getSwapOptionsForIngredient(catalogName);
-  const options = allCatalogOptions.filter(
-    (o) =>
-      o.label.trim().toLowerCase() !== ingredient.name.trim().toLowerCase(),
-  );
+
+  // Fetch AI swaps when dialog opens; fall back to static catalog
+  useEffect(() => {
+    if (!open) return;
+
+    setLoading(true);
+
+    fetch("/api/swaps", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ingredientName: catalogName,
+        recipeName: recipeName ?? "",
+        ingredientNames: allIngredientNames ?? [],
+      }),
+    })
+      .then((r) => r.json())
+      .then((data: { options?: SwapOption[] }) => {
+        const aiOptions = (data.options ?? []).filter(
+          (o) =>
+            o.label.trim().toLowerCase() !==
+            ingredient.name.trim().toLowerCase()
+        );
+
+        if (aiOptions.length > 0) {
+          setOptions(aiOptions);
+        } else {
+          // No AI results — fall back to static catalog
+          setOptions(getCatalogOptions(catalogName, ingredient.name));
+        }
+      })
+      .catch(() => {
+        setOptions(getCatalogOptions(catalogName, ingredient.name));
+      })
+      .finally(() => setLoading(false));
+  }, [open, catalogName, ingredient.name, recipeName, allIngredientNames]);
 
   if (isManualIngredientSwap(ingredient.note)) {
     return <ManualSwapReset recipeId={recipeId} ingredient={ingredient} />;
@@ -92,20 +148,20 @@ export function IngredientSwapSheet({ recipeId, ingredient }: Props) {
     });
   }
 
-  if (allCatalogOptions.length === 0) {
-    return null;
-  }
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button
           type="button"
           variant="secondary"
           size="sm"
           className="shrink-0 gap-1.5 border border-primary/40 px-2.5 py-1 text-xs font-semibold text-text-heading shadow-sm hover:border-primary/60 hover:bg-secondary/90"
         >
-          <FontAwesomeIcon icon={faRightLeft} className="h-3 w-3 shrink-0" aria-hidden />
+          <FontAwesomeIcon
+            icon={faRightLeft}
+            className="h-3 w-3 shrink-0"
+            aria-hidden
+          />
           Swap
         </Button>
       </DialogTrigger>
@@ -116,13 +172,22 @@ export function IngredientSwapSheet({ recipeId, ingredient }: Props) {
           </DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          Curated substitutes—no rewritten recipe, just honest tradeoffs.
+          Suggested substitutes—honest tradeoffs for this recipe.
         </p>
         <ul className="mt-4 space-y-2">
-          {options.length === 0 ? (
+          {loading ? (
+            // Loading skeleton
+            <>
+              {[1, 2, 3].map((i) => (
+                <li
+                  key={i}
+                  className="h-[68px] animate-pulse rounded-lg border border-border bg-muted/30"
+                />
+              ))}
+            </>
+          ) : options.length === 0 ? (
             <li className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-              No other swaps in the list for this ingredient—you&apos;re already on
-              the last option we suggest.
+              No substitutions found for this ingredient.
             </li>
           ) : (
             options.map((o) => (
@@ -133,9 +198,11 @@ export function IngredientSwapSheet({ recipeId, ingredient }: Props) {
                   className="hover:bg-accent/80 w-full rounded-lg border border-border bg-card px-4 py-3 text-left text-sm transition-colors"
                   onClick={() => choose(o.label, o.impactNote)}
                 >
-                  <span className="font-medium text-text-heading">{o.label}</span>
+                  <span className="font-medium text-text-heading">
+                    {o.label}
+                  </span>
                   <span className="mt-1 block text-muted-foreground">
-                    What changes: {o.impactNote}
+                    {o.impactNote}
                   </span>
                 </button>
               </li>
@@ -144,5 +211,15 @@ export function IngredientSwapSheet({ recipeId, ingredient }: Props) {
         </ul>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function getCatalogOptions(
+  catalogName: string,
+  ingredientName: string
+): SwapOption[] {
+  return getSwapOptionsForIngredient(catalogName).filter(
+    (o) =>
+      o.label.trim().toLowerCase() !== ingredientName.trim().toLowerCase()
   );
 }

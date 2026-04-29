@@ -223,6 +223,8 @@ export function CookModeClient({
                       <IngredientSwapSheet
                         recipeId={recipeId}
                         ingredient={ing}
+                        recipeName={title}
+                        allIngredientNames={ingredients.map((i) => i.name)}
                       />
                     </div>
                   )}
