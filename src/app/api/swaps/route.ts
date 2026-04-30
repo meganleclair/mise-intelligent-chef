@@ -48,6 +48,7 @@ Rules:
 - Only return options if the ingredient is meaningfully swappable (fats, dairy, proteins, grains, sweeteners, stocks). Return [] for vegetables, aromatics, herbs, and spices — those aren't swap candidates.
 - Combinations are great (e.g. "Cream cheese + whole milk" as a swap for heavy cream)
 - Do not include "${ingredientName}" itself
+- NEVER suggest canola oil, vegetable oil, corn oil, or any cheap neutral oil — these are not quality swaps
 - Keep impact notes short and practical — mention the tradeoff honestly`,
         },
       ],
