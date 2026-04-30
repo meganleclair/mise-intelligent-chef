@@ -32,6 +32,7 @@ export default async function DemoCookPage({ params }: Props) {
       title={decodeHtmlEntities(recipe.title)}
       steps={recipe.steps}
       ingredients={recipe.ingredients}
+      servings={recipe.servings}
       initialStepIndex={0}
       initialTimer={null}
       demoExitHref={`/demo/${slug}`}

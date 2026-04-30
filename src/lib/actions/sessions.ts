@@ -214,20 +214,10 @@ export async function finishCookingWithFeedback(
       .from("recipes")
       .update({ rating: r })
       .eq("id", rid)
-      .eq("user_id", user.id)
-      .select("id");
+      .eq("user_id", user.id);
 
     if (ratingErr) {
-      const msg = (ratingErr.message ?? "").toLowerCase();
-      const missingRatingColumn =
-        msg.includes("rating") &&
-        (msg.includes("schema cache") ||
-          msg.includes("could not find") ||
-          msg.includes("does not exist"));
-      if (!missingRatingColumn) {
-        return { ok: false as const, error: ratingErr.message };
-      }
-      // DB missing `rating` column (migration not applied) — favorite save above still worked.
+      return { ok: false as const, error: ratingErr.message };
     }
   }
 

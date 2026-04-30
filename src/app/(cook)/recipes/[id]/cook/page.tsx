@@ -36,6 +36,7 @@ export default async function CookPage({ params }: Props) {
   ]);
 
   const ingredients = mergeIngredientsWithMods(recipe.ingredients, mods);
+  const servings = session?.servings ?? recipe.servings;
 
   return (
     <CookModeClient
@@ -43,6 +44,7 @@ export default async function CookPage({ params }: Props) {
       title={decodeHtmlEntities(recipe.title)}
       steps={recipe.steps}
       ingredients={ingredients}
+      servings={servings}
       initialStepIndex={session?.currentStepIndex ?? 0}
       initialTimer={session?.timerState ?? null}
     />

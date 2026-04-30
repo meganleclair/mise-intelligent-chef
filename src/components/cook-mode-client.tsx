@@ -24,6 +24,7 @@ type Props = {
   title: string;
   steps: Step[];
   ingredients: Ingredient[];
+  servings: number;
   initialStepIndex: number;
   initialTimer: TimerState;
   /** Local-only cook mode: no session sync; exit & finish use this path. */
@@ -50,6 +51,7 @@ export function CookModeClient({
   title,
   steps,
   ingredients,
+  servings,
   initialStepIndex,
   initialTimer,
   demoExitHref,
@@ -170,6 +172,9 @@ export function CookModeClient({
             Cook mode
           </p>
           <h1 className="truncate font-serif text-lg text-text-heading">{title}</h1>
+          <p className="text-xs text-muted-foreground">
+            Serves {servings}
+          </p>
         </div>
         <Link
           href={demoExitHref ?? `/recipes/${recipeId}`}

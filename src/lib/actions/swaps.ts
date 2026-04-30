@@ -6,12 +6,11 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   buildBatchSwapRows,
   isBatchShiftNote,
-  type BatchSwapConflict,
   type SwapGoal,
 } from "@/lib/swap-catalog";
 import type { Ingredient } from "@/lib/types/recipe";
 
-export type { SwapGoal, BatchSwapConflict } from "@/lib/swap-catalog";
+export type { SwapGoal } from "@/lib/swap-catalog";
 
 const GOAL_LABEL: Record<SwapGoal, string> = {
   high_protein: "Higher protein",
@@ -115,7 +114,6 @@ Return ONLY a valid JSON array. Omit any ingredient with no meaningful swap:
 
 export type ApplyGoalSwapsResult =
   | { ok: true; applied: number }
-  | { ok: true; needsConfirmation: true; conflicts: BatchSwapConflict[] }
   | { ok: false; error: string };
 
 export async function applyIngredientSwap(
@@ -202,14 +200,13 @@ export async function clearIngredientSwap(recipeId: string, ingredientKey: strin
 }
 
 /**
- * Applies curated swaps for one or more goals (e.g. dairy-free + higher protein).
- * If two goals disagree on the same line, returns `needsConfirmation` unless
- * `acknowledgeConflicts` is true (then priority order applies—see CONFLICT_RESOLUTION_PRIORITY).
+ * Applies dietary goal swaps for one or more goals (e.g. dairy-free + higher protein).
+ * Claude reads the actual ingredient list and picks the most practical swaps for the dish.
+ * Falls back to the static catalog if Claude is unavailable.
  */
 export async function applyGoalSwaps(
   recipeId: string,
   goals: SwapGoal[],
-  options?: { acknowledgeConflicts?: boolean },
 ): Promise<ApplyGoalSwapsResult> {
   const supabase = await createSupabaseServerClient();
   const {
