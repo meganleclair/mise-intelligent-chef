@@ -37,19 +37,18 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "user",
-          content: `You are a practical home cook. Suggest exactly 3 realistic substitutions for "${ingredientName}" in the recipe "${recipeName || "this dish"}".${contextLine}
+          content: `You are a practical home cook helping someone make dietary or lifestyle swaps. For "${ingredientName}" in the recipe "${recipeName || "this dish"}",${contextLine} suggest 2–3 substitutions driven by real dietary needs: dairy-free, lower calorie, lower carb, higher protein, or ingredient availability.
 
-Return ONLY a valid JSON array — no markdown, no explanation, no refusals:
+Return ONLY a valid JSON array — no markdown, no explanation:
 [
-  { "label": "Substitute name", "impactNote": "One honest sentence on what changes: texture, flavor, or technique" }
+  { "label": "Substitute name or combination", "impactNote": "One honest sentence on what changes and why it works" }
 ]
 
 Rules:
-- ALWAYS return exactly 3 options — never return an empty array
-- Do not include "${ingredientName}" itself as an option
-- For essential ingredients (onion, garlic, carrot, herbs), give the closest practical swap plus 1–2 dietary alternatives
-- Keep impact notes to one punchy, practical sentence
-- If an ingredient is hard to swap, say so in the impact note but still give the option`,
+- Only return options if the ingredient is meaningfully swappable (fats, dairy, proteins, grains, sweeteners, stocks). Return [] for vegetables, aromatics, herbs, and spices — those aren't swap candidates.
+- Combinations are great (e.g. "Cream cheese + whole milk" as a swap for heavy cream)
+- Do not include "${ingredientName}" itself
+- Keep impact notes short and practical — mention the tradeoff honestly`,
         },
       ],
     });
