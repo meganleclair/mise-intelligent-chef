@@ -42,7 +42,7 @@ export default async function RecipeDetailPage({ params }: Props) {
   return (
     <article className="mx-auto max-w-3xl px-6 py-10">
       {heroSrc ? (
-        <div className="relative mb-10 aspect-[16/10] w-full overflow-hidden rounded-sm bg-muted">
+        <div className="relative mb-10 h-48 w-full overflow-hidden rounded-sm bg-muted sm:h-56">
           <RecipeImageFallback
             src={heroSrc}
             className="absolute inset-0 h-full w-full"

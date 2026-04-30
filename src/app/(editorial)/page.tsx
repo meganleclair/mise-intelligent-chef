@@ -4,7 +4,6 @@ import { ImportRecipeForm } from "@/components/import-recipe-form";
 import { RecentImportsCards } from "@/components/recent-imports-cards";
 import {
   getActiveCookSession,
-  getFeaturedRecipe,
   getRecentImports,
 } from "@/lib/data/queries";
 import { GetStartedDemoCards } from "@/components/get-started-demo-cards";
@@ -14,15 +13,10 @@ const HOME_HERO_IMAGE =
   "https://images.unsplash.com/photo-1611270629569-8b357cb88da9?auto=format&fit=crop&w=2560&q=90";
 
 export default async function HomePage() {
-  const [featured, active, recentAll] = await Promise.all([
-    getFeaturedRecipe(),
+  const [active, recentForCards] = await Promise.all([
     getActiveCookSession(),
-    getRecentImports(8),
+    getRecentImports(6),
   ]);
-
-  const recentForCards = recentAll
-    .filter((r) => !featured || r.id !== featured.id)
-    .slice(0, 6);
 
   return (
     <div className="mx-auto max-w-5xl px-6 pb-20 pt-10">
