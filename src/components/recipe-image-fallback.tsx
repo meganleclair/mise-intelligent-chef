@@ -5,6 +5,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons";
 import { cn } from "@/lib/utils";
 
+/** Route external recipe images through our server-side proxy to bypass hotlink protection. */
+function toProxiedSrc(src: string): string {
+  // Already a relative or data URL — serve as-is
+  if (src.startsWith("/") || src.startsWith("data:")) return src;
+  return `/api/image-proxy?url=${encodeURIComponent(src)}`;
+}
+
 const iconSize = {
   sm: "h-8 w-8",
   md: "h-10 w-10",
@@ -38,15 +45,14 @@ export function RecipeImageFallback({
   return (
     <div className={cn("relative bg-muted", className)}>
       {src && !failed ? (
-        // eslint-disable-next-line @next/next/no-img-element -- recipe URLs from any host
+        // eslint-disable-next-line @next/next/no-img-element -- proxied through /api/image-proxy
         <img
-          src={src}
+          src={toProxiedSrc(src)}
           alt={alt}
           className={cn(
             "absolute inset-0 h-full w-full object-cover",
             imageClassName,
           )}
-          referrerPolicy="no-referrer"
           loading={loading}
           decoding="async"
           onError={() => setFailed(true)}
