@@ -11,15 +11,15 @@ export type DemoRecipeMeta = {
 export type DemoRecipeBundle = DemoRecipeMeta & { recipe: CleanRecipe };
 
 /** Curated built-in recipes—controlled structure so layout and cook mode behave predictably. */
-// Warm tomato-orange soup in a dark ceramic bowl
+// Tomato & white bean stew in cast iron pot on wicker mat — matches recipe exactly
 const UP1 =
-  "https://images.unsplash.com/photo-1548943487-a2e4e43b4853?w=1400&q=80";
-// Grilled chicken breast with vegetables — clearly poultry
+  "https://images.unsplash.com/photo-1715216553304-4960f95dfff2?w=1400&q=80";
+// Lemon rosemary chicken in cast iron skillet with potatoes and fresh rosemary
 const UP2 =
-  "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=1400&q=80";
-// Spaghetti in a skillet with herbs and shrimp
+  "https://images.unsplash.com/photo-1615557960916-5f4791effe9d?w=1400&q=80";
+// Tagliatelle bolognese on tiled surface with red wine — rustic pasta
 const UP3 =
-  "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=1400&q=80";
+  "https://images.unsplash.com/photo-1692071097529-320eb2b32292?w=1400&q=80";
 
 export const DEMO_LIST: DemoRecipeBundle[] = [
   {
