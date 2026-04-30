@@ -11,12 +11,15 @@ export type DemoRecipeMeta = {
 export type DemoRecipeBundle = DemoRecipeMeta & { recipe: CleanRecipe };
 
 /** Curated built-in recipes—controlled structure so layout and cook mode behave predictably. */
+// Rustic tomato-and-bean stew in a wide pot
 const UP1 =
-  "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=1400&q=80";
+  "https://images.unsplash.com/photo-1608135227059-50a5e5a7c1d1?w=1400&q=80";
+// Golden sheet-pan chicken thighs with lemon and herbs
 const UP2 =
-  "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=1400&q=80";
+  "https://images.unsplash.com/photo-1598103442097-8b74394b95c1?w=1400&q=80";
+// Close-up spaghetti aglio e olio with herbs
 const UP3 =
-  "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=1400&q=80";
+  "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=1400&q=80";
 
 export const DEMO_LIST: DemoRecipeBundle[] = [
   {
