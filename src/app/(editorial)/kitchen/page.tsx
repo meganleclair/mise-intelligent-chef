@@ -2,8 +2,10 @@ import Link from "next/link";
 import { ContinueCookingBanner } from "@/components/continue-cooking-banner";
 import { DeleteRecipeButton } from "@/components/delete-recipe-button";
 import { RemoveFromRecentButton } from "@/components/remove-from-recent-button";
+import { KitchenFavoriteButton } from "@/components/kitchen-favorite-button";
 import { StarRatingDisplay } from "@/components/star-rating";
 import { RecipeImageFallback } from "@/components/recipe-image-fallback";
+import { ImportRecipeForm } from "@/components/import-recipe-form";
 import { normalizeImageUrl } from "@/lib/images";
 import {
   getActiveCookSession,
@@ -55,6 +57,13 @@ export default async function KitchenPage() {
         />
       ) : null}
 
+      {user ? (
+        <section className="mb-12 rounded-xl border border-border bg-muted/20 px-4 py-5 sm:px-6">
+          <h2 className="mb-3 font-serif text-xl text-text-heading">Import a recipe</h2>
+          <ImportRecipeForm />
+        </section>
+      ) : null}
+
       <section className="mb-12">
         <h2 className="mb-4 font-serif text-xl text-text-heading">
           Recently imported
@@ -83,18 +92,14 @@ export default async function KitchenPage() {
                   </div>
                   <Link
                     href={`/recipes/${r.id}`}
-                    className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3 py-2 transition-colors hover:opacity-80"
+                    className="flex min-w-0 flex-1 items-center gap-3 py-2 transition-colors hover:opacity-80"
                   >
-                    <span className="font-medium text-text-heading">{r.title}</span>
-                    <div className="flex flex-wrap items-center gap-3">
-                      {typeof r.rating === "number" ? (
-                        <StarRatingDisplay value={r.rating} size="sm" />
-                      ) : null}
-                      {r.favorite ? (
-                        <span className="text-xs text-muted-foreground">Saved</span>
-                      ) : null}
-                    </div>
+                    <span className="min-w-0 flex-1 font-medium text-text-heading">{r.title}</span>
+                    {typeof r.rating === "number" ? (
+                      <StarRatingDisplay value={r.rating} size="sm" />
+                    ) : null}
                   </Link>
+                  <KitchenFavoriteButton recipeId={r.id} initialFavorite={r.favorite ?? false} />
                   <RemoveFromRecentButton recipeId={r.id} recipeTitle={r.title} />
                 </li>
               );
