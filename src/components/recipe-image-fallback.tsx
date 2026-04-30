@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 function toProxiedSrc(src: string): string {
   // Already a relative or data URL — serve as-is
   if (src.startsWith("/") || src.startsWith("data:")) return src;
+  // Unsplash CDN is publicly accessible — no proxy needed, serve directly
+  if (src.includes("images.unsplash.com")) return src;
   return `/api/image-proxy?url=${encodeURIComponent(src)}`;
 }
 

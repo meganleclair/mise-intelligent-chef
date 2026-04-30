@@ -83,8 +83,10 @@ export async function GET(request: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": baseType,
-        // Cache for 7 days at the CDN/browser level
-        "Cache-Control": "public, max-age=604800, stale-while-revalidate=86400",
+        // private: browser-only caching — CDN must NOT cache this route because
+        // Netlify's edge ignores the `url` query param in its cache key, causing
+        // different images to be served from the same cached response.
+        "Cache-Control": "private, max-age=86400",
         "Content-Length": String(buffer.byteLength),
       },
     });
