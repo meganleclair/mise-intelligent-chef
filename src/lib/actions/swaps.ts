@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import Anthropic from "@anthropic-ai/sdk";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   buildBatchSwapRows,
@@ -11,6 +12,106 @@ import {
 import type { Ingredient } from "@/lib/types/recipe";
 
 export type { SwapGoal, BatchSwapConflict } from "@/lib/swap-catalog";
+
+const GOAL_LABEL: Record<SwapGoal, string> = {
+  high_protein: "Higher protein",
+  lower_calorie: "Lower calorie",
+  lower_carb: "Lower carb",
+  higher_fiber: "Higher fiber",
+  lower_sodium: "Lower sodium",
+  dairy_free: "Dairy-free",
+};
+
+type ClaudeSwapRow = {
+  ingredientId: string;
+  replacement: string;
+  impactNote: string;
+};
+
+async function applyGoalSwapsWithClaude(
+  ingredients: Ingredient[],
+  goals: SwapGoal[],
+  manualIngredientKeys: Set<string>,
+  recipeName: string,
+): Promise<{ rows: { ingredient_key: string; replacement_label: string; impact_note: string }[] }> {
+  const client = new Anthropic();
+
+  const goalsText = goals.map((g) => GOAL_LABEL[g]).join(", ");
+  const shiftLabel = goals.map((g) => GOAL_LABEL[g]).join(" + ");
+
+  const eligibleIngredients = ingredients.filter(
+    (i) => !manualIngredientKeys.has(i.id),
+  );
+
+  const ingredientList = eligibleIngredients
+    .map((i) => {
+      const parts = [i.quantity, i.unit, i.name].filter(Boolean).join(" ");
+      return `id:${i.id} | ${parts}`;
+    })
+    .join("\n");
+
+  const message = await client.messages.create({
+    model: "claude-haiku-4-5",
+    max_tokens: 1024,
+    messages: [
+      {
+        role: "user",
+        content: `You are a practical home cook applying dietary shifts to a recipe. For each ingredient that can be meaningfully swapped to serve the goals, suggest the single best substitution.
+
+Recipe: "${recipeName}"
+Goals: ${goalsText}
+
+Ingredients:
+${ingredientList}
+
+Rules:
+- Only swap: fats, dairy, proteins, grains, sweeteners, stocks, and cooking oils
+- Skip completely: vegetables, aromatics (garlic, onion, shallot, leek), herbs, spices, salt, pepper, acids (lemon juice, vinegar, citrus zest)
+- NEVER suggest canola oil, vegetable oil, corn oil, or any cheap neutral oil
+- When goals conflict on the same ingredient, pick the swap that serves the most goals simultaneously
+- Skip ingredients already well-optimized for all goals (e.g. egg whites for high protein)
+
+Return ONLY a valid JSON array. Omit any ingredient with no meaningful swap:
+[
+  {
+    "ingredientId": "exact id from the list above",
+    "replacement": "Substitute name",
+    "impactNote": "One honest sentence on what changes"
+  }
+]`,
+      },
+    ],
+  });
+
+  const text =
+    message.content[0].type === "text" ? message.content[0].text.trim() : "";
+  const jsonMatch = text.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) return { rows: [] };
+
+  const parsed: unknown = JSON.parse(jsonMatch[0]);
+  if (!Array.isArray(parsed)) return { rows: [] };
+
+  const claudeRows = (parsed as ClaudeSwapRow[]).filter(
+    (r) =>
+      typeof r.ingredientId === "string" &&
+      typeof r.replacement === "string" &&
+      typeof r.impactNote === "string",
+  );
+
+  const rows = claudeRows.flatMap((r) => {
+    const ingredient = eligibleIngredients.find((i) => i.id === r.ingredientId);
+    if (!ingredient) return [];
+    return [
+      {
+        ingredient_key: ingredient.id,
+        replacement_label: r.replacement,
+        impact_note: `[${shiftLabel} shift] ${r.impactNote}`,
+      },
+    ];
+  });
+
+  return { rows };
+}
 
 export type ApplyGoalSwapsResult =
   | { ok: true; applied: number }
@@ -120,7 +221,7 @@ export async function applyGoalSwaps(
 
   const { data: row, error: fetchErr } = await supabase
     .from("recipes")
-    .select("ingredients")
+    .select("title, ingredients")
     .eq("id", recipeId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -133,6 +234,7 @@ export async function applyGoalSwaps(
   }
 
   const ingredients = row.ingredients as Ingredient[];
+  const recipeName = (row.title as string | null) ?? "this dish";
 
   const { data: existingMods, error: modErr } = await supabase
     .from("recipe_modifications")
@@ -176,16 +278,36 @@ export async function applyGoalSwaps(
     return { ok: true as const, applied: 0 };
   }
 
-  const resolveConflicts = options?.acknowledgeConflicts ?? false;
-  const { rows: batchRows, conflicts } = buildBatchSwapRows(
-    ingredients,
-    dedupedGoals,
-    manualIngredientKeys,
-    resolveConflicts,
-  );
+  // Use Claude when the API key is configured; fall back to the static catalog otherwise.
+  let batchRows: { ingredient_key: string; replacement_label: string; impact_note: string }[];
 
-  if (conflicts.length > 0) {
-    return { ok: true as const, needsConfirmation: true, conflicts };
+  if (process.env.ANTHROPIC_API_KEY) {
+    try {
+      const result = await applyGoalSwapsWithClaude(
+        ingredients,
+        dedupedGoals,
+        manualIngredientKeys,
+        recipeName,
+      );
+      batchRows = result.rows;
+    } catch {
+      // Claude failed — fall back to static catalog silently
+      const fallback = buildBatchSwapRows(
+        ingredients,
+        dedupedGoals,
+        manualIngredientKeys,
+        true,
+      );
+      batchRows = fallback.rows;
+    }
+  } else {
+    const fallback = buildBatchSwapRows(
+      ingredients,
+      dedupedGoals,
+      manualIngredientKeys,
+      true,
+    );
+    batchRows = fallback.rows;
   }
 
   if (batchRowIds.length > 0) {

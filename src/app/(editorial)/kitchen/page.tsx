@@ -3,6 +3,8 @@ import { ContinueCookingBanner } from "@/components/continue-cooking-banner";
 import { DeleteRecipeButton } from "@/components/delete-recipe-button";
 import { RemoveFromRecentButton } from "@/components/remove-from-recent-button";
 import { StarRatingDisplay } from "@/components/star-rating";
+import { RecipeImageFallback } from "@/components/recipe-image-fallback";
+import { normalizeImageUrl } from "@/lib/images";
 import {
   getActiveCookSession,
   getFavoriteRecipes,
@@ -65,28 +67,38 @@ export default async function KitchenPage() {
           </p>
         ) : (
           <ul className="divide-y divide-border border border-border">
-            {recent.map((r) => (
-              <li
-                key={r.id}
-                className="flex items-center gap-2 px-2 py-1 sm:px-4 sm:py-2"
-              >
-                <Link
-                  href={`/recipes/${r.id}`}
-                  className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3 py-3 pl-2 transition-colors hover:bg-muted/50 sm:py-4 sm:pl-0"
+            {recent.map((r) => {
+              const src = r.image_url ? normalizeImageUrl(r.image_url) : null;
+              return (
+                <li
+                  key={r.id}
+                  className="flex items-center gap-3 px-2 py-2 sm:px-4"
                 >
-                  <span className="font-medium text-text-heading">{r.title}</span>
-                  <div className="flex flex-wrap items-center gap-3">
-                    {typeof r.rating === "number" ? (
-                      <StarRatingDisplay value={r.rating} size="sm" />
-                    ) : null}
-                    {r.favorite ? (
-                      <span className="text-xs text-muted-foreground">Saved</span>
-                    ) : null}
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded bg-muted sm:h-14 sm:w-14">
+                    <RecipeImageFallback
+                      src={src}
+                      className="absolute inset-0 h-full w-full"
+                      size="sm"
+                    />
                   </div>
-                </Link>
-                <RemoveFromRecentButton recipeId={r.id} recipeTitle={r.title} />
-              </li>
-            ))}
+                  <Link
+                    href={`/recipes/${r.id}`}
+                    className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3 py-2 transition-colors hover:opacity-80"
+                  >
+                    <span className="font-medium text-text-heading">{r.title}</span>
+                    <div className="flex flex-wrap items-center gap-3">
+                      {typeof r.rating === "number" ? (
+                        <StarRatingDisplay value={r.rating} size="sm" />
+                      ) : null}
+                      {r.favorite ? (
+                        <span className="text-xs text-muted-foreground">Saved</span>
+                      ) : null}
+                    </div>
+                  </Link>
+                  <RemoveFromRecentButton recipeId={r.id} recipeTitle={r.title} />
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
@@ -95,23 +107,33 @@ export default async function KitchenPage() {
         <section>
           <h2 className="mb-4 font-serif text-xl text-text-heading">Favorites</h2>
           <ul className="divide-y divide-border border border-border">
-            {favorites.map((r) => (
-              <li
-                key={r.id}
-                className="flex items-center gap-2 px-2 py-1 sm:px-4 sm:py-2"
-              >
-                <Link
-                  href={`/recipes/${r.id}`}
-                  className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3 py-3 pl-2 transition-colors hover:bg-muted/50 sm:py-4 sm:pl-0"
+            {favorites.map((r) => {
+              const src = r.image_url ? normalizeImageUrl(r.image_url) : null;
+              return (
+                <li
+                  key={r.id}
+                  className="flex items-center gap-3 px-2 py-2 sm:px-4"
                 >
-                  <span className="font-medium text-text-heading">{r.title}</span>
-                  {typeof r.rating === "number" ? (
-                    <StarRatingDisplay value={r.rating} size="sm" />
-                  ) : null}
-                </Link>
-                <DeleteRecipeButton recipeId={r.id} recipeTitle={r.title} />
-              </li>
-            ))}
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded bg-muted sm:h-14 sm:w-14">
+                    <RecipeImageFallback
+                      src={src}
+                      className="absolute inset-0 h-full w-full"
+                      size="sm"
+                    />
+                  </div>
+                  <Link
+                    href={`/recipes/${r.id}`}
+                    className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3 py-2 transition-colors hover:opacity-80"
+                  >
+                    <span className="font-medium text-text-heading">{r.title}</span>
+                    {typeof r.rating === "number" ? (
+                      <StarRatingDisplay value={r.rating} size="sm" />
+                    ) : null}
+                  </Link>
+                  <DeleteRecipeButton recipeId={r.id} recipeTitle={r.title} />
+                </li>
+              );
+            })}
           </ul>
         </section>
       ) : null}

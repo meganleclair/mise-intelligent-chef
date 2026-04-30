@@ -142,16 +142,9 @@ export function RecipeGoalSwaps({ recipeId }: Props) {
       <section className="rounded-xl border border-border bg-muted/30 px-4 py-5 sm:px-6">
         <h2 className="font-serif text-xl text-text-heading">Shift the recipe</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          Turn on one or more shifts, then apply—we&apos;ll combine them where the
-          catalog agrees. If two shifts want different substitutes on the same
-          line, we&apos;ll ask before changing anything.
-        </p>
-        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-          When that happens, priority is:{" "}
-          {CONFLICT_RESOLUTION_PRIORITY.map((g) => SHIFT_GOAL_LABEL[g]).join(
-            " → ",
-          )}
-          .
+          Pick one or more dietary goals and Claude will read your ingredient
+          list and apply the most practical swaps—grounded in the actual dish,
+          not a generic lookup. Manual swaps you&apos;ve already chosen stay put.
         </p>
         <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {GOALS.map(({ goal, label, icon }) => {
