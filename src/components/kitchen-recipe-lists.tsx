@@ -78,7 +78,7 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
         <section className="mb-12">
           <h2 className="mb-4 font-serif text-xl text-text-heading">
             Favorites
-          </h2>
+</h2>
           {filteredFavorites.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No favorites match &ldquo;{query}&rdquo;.
@@ -133,7 +133,7 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
 
       <section className="mb-12">
         <h2 className="mb-4 font-serif text-xl text-text-heading">
-          Recently imported
+          Recently Imported
         </h2>
         {recent.length === 0 ? (
           <p className="text-sm text-muted-foreground">

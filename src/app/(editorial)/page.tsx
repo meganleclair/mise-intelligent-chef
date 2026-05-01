@@ -72,7 +72,19 @@ export default async function HomePage() {
       <section className="mt-20 border-t border-border pt-14">
         <div className="mb-8 space-y-2">
           <h2 className="font-serif text-2xl text-text-heading">
-            Try a recipe
+            Recently Imported
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Your latest saves, ready to open or cook.
+          </p>
+        </div>
+        <RecentImportsCards recipes={recentForCards} isLoggedIn={Boolean(user)} />
+      </section>
+
+      <section className="mt-20 border-t border-border pt-14">
+        <div className="mb-8 space-y-2">
+          <h2 className="font-serif text-2xl text-text-heading">
+            Try a Recipe
           </h2>
           <p className="text-sm text-muted-foreground">
             No upload needed—open a full recipe and jump into prep or cook mode whenever
@@ -80,18 +92,6 @@ export default async function HomePage() {
           </p>
         </div>
         <GetStartedDemoCards />
-      </section>
-
-      <section className="mt-20 border-t border-border pt-14">
-        <div className="mb-8 space-y-2">
-          <h2 className="font-serif text-2xl text-text-heading">
-            Recently imported
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Your latest saves, ready to open or cook.
-          </p>
-        </div>
-        <RecentImportsCards recipes={recentForCards} isLoggedIn={Boolean(user)} />
       </section>
     </div>
   );
