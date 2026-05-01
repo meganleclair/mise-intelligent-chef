@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export type SwapOption = {
   label: string;
@@ -9,6 +11,35 @@ export type SwapOption = {
 const client = new Anthropic();
 
 export async function POST(request: NextRequest) {
+  // Auth required — only signed-in users can trigger Claude calls.
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Sign in to use swaps." }, { status: 401 });
+  }
+
+  // Rate limit: 20 swap requests per minute per user.
+  const { allowed, remaining, resetMs } = checkRateLimit(
+    `swaps:${user.id}`,
+    20,
+    60_000,
+  );
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many swap requests. Wait a moment and try again." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil(resetMs / 1000)),
+          "X-RateLimit-Remaining": "0",
+        },
+      },
+    );
+  }
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     // No key configured — caller falls back to static catalog
@@ -22,7 +53,7 @@ export async function POST(request: NextRequest) {
     if (!ingredientName || typeof ingredientName !== "string") {
       return NextResponse.json(
         { error: "ingredientName required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -57,7 +88,6 @@ Rules:
     const text =
       message.content[0].type === "text" ? message.content[0].text.trim() : "";
 
-    // Extract JSON array robustly
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (!jsonMatch) {
       return NextResponse.json({ options: [] });
@@ -73,14 +103,16 @@ Rules:
       .filter(
         (o): o is SwapOption =>
           typeof (o as SwapOption).label === "string" &&
-          typeof (o as SwapOption).impactNote === "string"
+          typeof (o as SwapOption).impactNote === "string",
       )
       .slice(0, 5);
 
-    return NextResponse.json({ options });
+    return NextResponse.json(
+      { options },
+      { headers: { "X-RateLimit-Remaining": String(remaining) } },
+    );
   } catch (error) {
     console.error("Swap API error:", error);
-    // Return empty — component falls back to static catalog
     return NextResponse.json({ options: [] });
   }
 }

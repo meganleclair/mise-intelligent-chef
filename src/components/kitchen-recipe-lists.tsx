@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { KitchenFavoriteButton } from "@/components/kitchen-favorite-button";
 import { RemoveFromRecentButton } from "@/components/remove-from-recent-button";
 import { DeleteRecipeButton } from "@/components/delete-recipe-button";
@@ -32,8 +32,13 @@ type Props = {
   isLoggedIn: boolean;
 };
 
+const RECENT_PAGE = 8;
+const FAVORITES_PAGE = 12;
+
 export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
   const [query, setQuery] = useState("");
+  const [recentLimit, setRecentLimit] = useState(RECENT_PAGE);
+  const [favoritesLimit, setFavoritesLimit] = useState(FAVORITES_PAGE);
   const q = query.toLowerCase().trim();
 
   const filteredRecent = q
@@ -42,6 +47,10 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
   const filteredFavorites = q
     ? favorites.filter((r) => r.title.toLowerCase().includes(q))
     : favorites;
+
+  // When searching, show all results; otherwise respect the pagination limit
+  const visibleRecent = q ? filteredRecent : filteredRecent.slice(0, recentLimit);
+  const visibleFavorites = q ? filteredFavorites : filteredFavorites.slice(0, favoritesLimit);
 
   const hasAny = recent.length > 0 || favorites.length > 0;
 
@@ -80,8 +89,9 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
             No recent recipes match &ldquo;{query}&rdquo;.
           </p>
         ) : (
+          <>
           <ul className="divide-y divide-border border border-border">
-            {filteredRecent.map((r) => {
+            {visibleRecent.map((r) => {
               const src = r.image_url ? normalizeImageUrl(r.image_url) : null;
               return (
                 <li
@@ -115,6 +125,17 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
               );
             })}
           </ul>
+          {!q && filteredRecent.length > recentLimit ? (
+            <button
+              type="button"
+              onClick={() => setRecentLimit((n) => n + RECENT_PAGE)}
+              className="mt-3 flex w-full items-center justify-center gap-2 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <FontAwesomeIcon icon={faChevronDown} className="h-3 w-3" aria-hidden />
+              Show {Math.min(RECENT_PAGE, filteredRecent.length - recentLimit)} more
+            </button>
+          ) : null}
+          </>
         )}
       </section>
 
@@ -128,8 +149,9 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
               No favorites match &ldquo;{query}&rdquo;.
             </p>
           ) : (
+            <>
             <ul className="divide-y divide-border border border-border">
-              {filteredFavorites.map((r) => {
+              {visibleFavorites.map((r) => {
                 const src = r.image_url ? normalizeImageUrl(r.image_url) : null;
                 return (
                   <li
@@ -159,6 +181,17 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
                 );
               })}
             </ul>
+            {!q && filteredFavorites.length > favoritesLimit ? (
+              <button
+                type="button"
+                onClick={() => setFavoritesLimit((n) => n + FAVORITES_PAGE)}
+                className="mt-3 flex w-full items-center justify-center gap-2 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <FontAwesomeIcon icon={faChevronDown} className="h-3 w-3" aria-hidden />
+                Show {Math.min(FAVORITES_PAGE, filteredFavorites.length - favoritesLimit)} more
+              </button>
+            ) : null}
+            </>
           )}
         </section>
       ) : null}

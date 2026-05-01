@@ -17,7 +17,7 @@ export default async function KitchenPage() {
 
   const [active, recent, favorites] = await Promise.all([
     getActiveCookSession(),
-    getRecentImports(8),
+    getRecentImports(50),
     getFavoriteRecipes(),
   ]);
 

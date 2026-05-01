@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const ALLOWED_CONTENT_TYPES = [
   "image/jpeg",
@@ -14,6 +15,16 @@ const ALLOWED_CONTENT_TYPES = [
 const MAX_BYTES = 8 * 1024 * 1024;
 
 export async function GET(request: NextRequest) {
+  // Rate limit: 60 image requests per minute per IP.
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip") ??
+    "unknown";
+  const { allowed } = checkRateLimit(`image-proxy:${ip}`, 60, 60_000);
+  if (!allowed) {
+    return new NextResponse("Too many requests", { status: 429 });
+  }
+
   const { searchParams } = request.nextUrl;
   const url = searchParams.get("url");
 

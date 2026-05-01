@@ -165,7 +165,7 @@ export async function getFavoriteRecipes() {
     .eq("user_id", user.id)
     .eq("favorite", true)
     .order("created_at", { ascending: false })
-    .limit(12);
+    .limit(50);
 
   return data ?? [];
 }
