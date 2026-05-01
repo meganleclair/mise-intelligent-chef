@@ -1,8 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Ingredient } from "@/lib/types/recipe";
 
-const client = new Anthropic();
-
 /**
  * Use Claude Haiku to write a clean 2-3 sentence recipe description.
  * Replaces the garbage marketing copy from Spoonacular or scraped descriptions.
@@ -13,7 +11,13 @@ export async function generateRecipeSummary(
   servings: number,
   ingredients: Ingredient[],
 ): Promise<string | null> {
-  if (!process.env.ANTHROPIC_API_KEY) return null;
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.warn("[generateRecipeSummary] ANTHROPIC_API_KEY not set — skipping");
+    return null;
+  }
+
+  // Instantiate inside the function so the key is read at call time, not build time
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   const ingredientNames = ingredients
     .map((i) => [i.quantity, i.unit, i.name].filter(Boolean).join(" "))
@@ -48,7 +52,8 @@ Write only the description, no preamble.`,
     const text =
       message.content[0].type === "text" ? message.content[0].text.trim() : "";
     return text || null;
-  } catch {
+  } catch (err) {
+    console.error("[generateRecipeSummary] Claude API error:", err);
     return null;
   }
 }

@@ -13,7 +13,6 @@ import { getModifications, getRecipeForUser } from "@/lib/data/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SignInPrompt } from "@/components/sign-in-prompt";
 import { RecipeImageFallback } from "@/components/recipe-image-fallback";
-import { RegenerateSummaryButton } from "@/components/regenerate-summary-button";
 import { normalizeImageUrl } from "@/lib/images";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -61,15 +60,10 @@ export default async function RecipeDetailPage({ params }: Props) {
           {decodeHtmlEntities(recipe.title)}
         </h1>
         {recipe.summary ? (
-          <div className="space-y-1.5">
-            <p className="break-words text-lg leading-relaxed text-muted-foreground">
-              {decodeHtmlEntities(tidyRecipeSummaryForDisplay(recipe.summary))}
-            </p>
-            <RegenerateSummaryButton recipeId={id} />
-          </div>
-        ) : (
-          <RegenerateSummaryButton recipeId={id} />
-        )}
+          <p className="break-words text-lg leading-relaxed text-muted-foreground">
+            {decodeHtmlEntities(tidyRecipeSummaryForDisplay(recipe.summary))}
+          </p>
+        ) : null}
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm text-muted-foreground">
             Serves {recipe.servings}
