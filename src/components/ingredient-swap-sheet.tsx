@@ -22,6 +22,11 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
+// Swap trigger styles — applied directly to DialogTrigger so we don't nest
+// a <button> inside another <button> (invalid HTML / hydration error).
+const swapTriggerClass =
+  "inline-flex shrink-0 items-center gap-1.5 rounded-md border border-primary/40 bg-secondary px-2.5 py-1 text-xs font-semibold text-text-heading shadow-sm transition-colors hover:border-primary/60 hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
+
 type SwapOption = { label: string; impactNote: string };
 
 type Props = {
@@ -153,20 +158,13 @@ export function IngredientSwapSheet({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          className="shrink-0 gap-1.5 border border-primary/40 px-2.5 py-1 text-xs font-semibold text-text-heading shadow-sm hover:border-primary/60 hover:bg-secondary/90"
-        >
-          <FontAwesomeIcon
-            icon={faRightLeft}
-            className="h-3 w-3 shrink-0"
-            aria-hidden
-          />
-          Swap
-        </Button>
+      <DialogTrigger className={swapTriggerClass}>
+        <FontAwesomeIcon
+          icon={faRightLeft}
+          className="h-3 w-3 shrink-0"
+          aria-hidden
+        />
+        Swap
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

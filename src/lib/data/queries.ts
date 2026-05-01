@@ -141,13 +141,17 @@ export async function getRecentImports(limit = 6) {
   } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("recipes")
     .select("id, title, image_url, created_at, favorite, rating")
     .eq("user_id", user.id)
     .is("hidden_from_recent_at", null)
     .order("created_at", { ascending: false })
     .limit(limit);
+
+  if (error) {
+    console.error("[getRecentImports] query failed:", error.message);
+  }
 
   return data ?? [];
 }
