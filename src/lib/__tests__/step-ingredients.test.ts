@@ -30,8 +30,7 @@ describe("getIngredientsForStep", () => {
     expect(list).toEqual([]);
   });
 
-  it("matches an ingredient by full name", () => {
-    // "yellow onion" requires both "yellow" AND "onion" to appear in the step
+  it("matches an ingredient by full name (tier 1)", () => {
     const { list, narrowed } = getIngredientsForStep(
       "Cook yellow onion until soft.",
       INGREDIENTS
@@ -40,14 +39,22 @@ describe("getIngredientsForStep", () => {
     expect(list.map((i) => i.id)).toContain("2");
   });
 
-  it("does NOT match a multi-word ingredient when only one word appears", () => {
-    // "yellow onion" should NOT match if only "onion" is in the step — all words required
-    const { narrowed } = getIngredientsForStep(
+  it("matches on last word (primary noun) when full name isn't present (tier 4)", () => {
+    // "add the onion" should match "Yellow onion" via last-word fallback
+    const { list, narrowed } = getIngredientsForStep(
       "Cook the onion until soft.",
       INGREDIENTS
     );
-    // "yellow onion" won't match, but "garlic cloves" won't either —
-    // nothing matches so it falls back
+    expect(narrowed).toBe(true);
+    expect(list.map((i) => i.id)).toContain("2");
+  });
+
+  it("does NOT match 'oil' inside 'boil' (word boundary)", () => {
+    const oilIng: Ingredient[] = [ing("oil", "Olive oil")];
+    const { narrowed } = getIngredientsForStep(
+      "Bring a pot of water to a boil.",
+      oilIng
+    );
     expect(narrowed).toBe(false);
   });
 
