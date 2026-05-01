@@ -29,7 +29,7 @@ export function RecentImportsCards({ recipes, isLoggedIn = true }: Props) {
     if (!isLoggedIn) {
       return (
         <p className="text-sm text-muted-foreground">
-          <a href="/login" className="underline underline-offset-2 hover:text-foreground">Sign in</a> to see your imported recipes.
+          <Link href="/login" className="underline underline-offset-2 hover:text-foreground">Sign in</Link> to see your imported recipes.
         </p>
       );
     }
