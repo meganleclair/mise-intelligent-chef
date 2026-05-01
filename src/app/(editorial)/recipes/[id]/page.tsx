@@ -8,7 +8,6 @@ import { RecipeStepsReader } from "@/components/recipe-steps-reader";
 import { mergeIngredientsWithMods } from "@/lib/recipes/display";
 import { IngredientLine } from "@/components/ingredient-line";
 import { decodeHtmlEntities } from "@/lib/decode-html-entities";
-import { tidyRecipeSummaryForDisplay } from "@/lib/recipes/summary";
 import { getModifications, getRecipeForUser } from "@/lib/data/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SignInPrompt } from "@/components/sign-in-prompt";
@@ -59,11 +58,6 @@ export default async function RecipeDetailPage({ params }: Props) {
         <h1 className="font-serif text-4xl text-text-heading">
           {decodeHtmlEntities(recipe.title)}
         </h1>
-        {recipe.summary ? (
-          <p className="break-words text-lg leading-relaxed text-muted-foreground">
-            {decodeHtmlEntities(tidyRecipeSummaryForDisplay(recipe.summary))}
-          </p>
-        ) : null}
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm text-muted-foreground">
             Serves {recipe.servings}
