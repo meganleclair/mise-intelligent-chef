@@ -151,8 +151,10 @@ export async function getRecentImports(limit = 6) {
 
   if (error) {
     console.error("[getRecentImports] query failed:", error.message);
+    return [];
   }
 
+  console.log(`[getRecentImports] user=${user.id.slice(0, 8)}… returned ${data?.length ?? 0} rows`);
   return data ?? [];
 }
 

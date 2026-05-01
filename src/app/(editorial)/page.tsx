@@ -7,12 +7,16 @@ import {
   getRecentImports,
 } from "@/lib/data/queries";
 import { GetStartedDemoCards } from "@/components/get-started-demo-cards";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 /** Home hero (pick one): unsplash.com/photos/d9jcPTRD9fo • MqT0asuoIcU • pHeX8H9WQpY */
 const HOME_HERO_IMAGE =
   "https://images.unsplash.com/photo-1611270629569-8b357cb88da9?auto=format&fit=crop&w=2560&q=90";
 
 export default async function HomePage() {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   const [active, recentForCards] = await Promise.all([
     getActiveCookSession(),
     getRecentImports(6),
@@ -87,7 +91,7 @@ export default async function HomePage() {
             Your latest saves, ready to open or cook.
           </p>
         </div>
-        <RecentImportsCards recipes={recentForCards} />
+        <RecentImportsCards recipes={recentForCards} isLoggedIn={Boolean(user)} />
       </section>
     </div>
   );

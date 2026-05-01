@@ -21,10 +21,18 @@ export type RecentImportCard = {
 
 type Props = {
   recipes: RecentImportCard[];
+  isLoggedIn?: boolean;
 };
 
-export function RecentImportsCards({ recipes }: Props) {
+export function RecentImportsCards({ recipes, isLoggedIn = true }: Props) {
   if (recipes.length === 0) {
+    if (!isLoggedIn) {
+      return (
+        <p className="text-sm text-muted-foreground">
+          <a href="/login" className="underline underline-offset-2 hover:text-foreground">Sign in</a> to see your imported recipes.
+        </p>
+      );
+    }
     return (
       <p className="text-sm text-muted-foreground">
         Nothing here yet—paste a recipe URL above and it will land on this shelf.
