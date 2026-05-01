@@ -97,7 +97,6 @@ export function IngredientSwapSheet({
   const [pending, startTransition] = useTransition();
   const [options, setOptions] = useState<SwapOption[]>([]);
   const [loading, setLoading] = useState(false);
-  const [noSwaps, setNoSwaps] = useState(false);
 
   const catalogName = ingredient.swapBasisName ?? ingredient.name;
 
@@ -131,27 +130,14 @@ export function IngredientSwapSheet({
 
         // No AI results — fall back to static catalog
         const catalog = getCatalogOptions(catalogName, ingredient.name);
-        if (catalog.length > 0) {
-          setOptions(catalog);
-        } else {
-          // Nothing from AI or catalog — hide the button
-          setOpen(false);
-          setNoSwaps(true);
-        }
+        setOptions(catalog);
       })
       .catch(() => {
         const catalog = getCatalogOptions(catalogName, ingredient.name);
-        if (catalog.length > 0) {
-          setOptions(catalog);
-        } else {
-          setOpen(false);
-          setNoSwaps(true);
-        }
+        setOptions(catalog);
       })
       .finally(() => setLoading(false));
   }, [open, catalogName, ingredient.name, recipeName, allIngredientNames]);
-
-  if (noSwaps) return null;
 
   if (isManualIngredientSwap(ingredient.note)) {
     return <ManualSwapReset recipeId={recipeId} ingredient={ingredient} />;
@@ -204,7 +190,7 @@ export function IngredientSwapSheet({
             </>
           ) : options.length === 0 ? (
             <li className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-              No substitutions found for this ingredient.
+              This ingredient is pretty essential as-is — no good substitutions for this one.
             </li>
           ) : (
             options.map((o) => (
