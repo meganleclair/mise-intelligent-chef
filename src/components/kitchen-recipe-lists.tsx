@@ -74,6 +74,63 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
         </div>
       ) : null}
 
+      {favorites.length > 0 ? (
+        <section className="mb-12">
+          <h2 className="mb-4 font-serif text-xl text-text-heading">
+            Favorites
+          </h2>
+          {filteredFavorites.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No favorites match &ldquo;{query}&rdquo;.
+            </p>
+          ) : (
+            <>
+            <ul className="divide-y divide-border border border-border">
+              {visibleFavorites.map((r) => {
+                const src = r.image_url ? normalizeImageUrl(r.image_url) : null;
+                return (
+                  <li
+                    key={r.id}
+                    className="flex items-center gap-3 px-2 py-2 sm:px-4"
+                  >
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded bg-muted sm:h-14 sm:w-14">
+                      <RecipeImageFallback
+                        src={src}
+                        className="absolute inset-0 h-full w-full"
+                        size="sm"
+                      />
+                    </div>
+                    <Link
+                      href={`/recipes/${r.id}`}
+                      className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3 py-2 transition-colors hover:opacity-80"
+                    >
+                      <span className="font-medium text-text-heading">
+                        {r.title}
+                      </span>
+                      {typeof r.rating === "number" ? (
+                        <StarRatingDisplay value={r.rating} size="sm" />
+                      ) : null}
+                    </Link>
+                    <DeleteRecipeButton recipeId={r.id} recipeTitle={r.title} />
+                  </li>
+                );
+              })}
+            </ul>
+            {!q && filteredFavorites.length > favoritesLimit ? (
+              <button
+                type="button"
+                onClick={() => setFavoritesLimit((n) => n + FAVORITES_PAGE)}
+                className="mt-3 flex w-full items-center justify-center gap-2 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <FontAwesomeIcon icon={faChevronDown} className="h-3 w-3" aria-hidden />
+                Show {Math.min(FAVORITES_PAGE, filteredFavorites.length - favoritesLimit)} more
+              </button>
+            ) : null}
+            </>
+          )}
+        </section>
+      ) : null}
+
       <section className="mb-12">
         <h2 className="mb-4 font-serif text-xl text-text-heading">
           Recently imported
@@ -138,63 +195,6 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
           </>
         )}
       </section>
-
-      {favorites.length > 0 ? (
-        <section>
-          <h2 className="mb-4 font-serif text-xl text-text-heading">
-            Favorites
-          </h2>
-          {filteredFavorites.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No favorites match &ldquo;{query}&rdquo;.
-            </p>
-          ) : (
-            <>
-            <ul className="divide-y divide-border border border-border">
-              {visibleFavorites.map((r) => {
-                const src = r.image_url ? normalizeImageUrl(r.image_url) : null;
-                return (
-                  <li
-                    key={r.id}
-                    className="flex items-center gap-3 px-2 py-2 sm:px-4"
-                  >
-                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded bg-muted sm:h-14 sm:w-14">
-                      <RecipeImageFallback
-                        src={src}
-                        className="absolute inset-0 h-full w-full"
-                        size="sm"
-                      />
-                    </div>
-                    <Link
-                      href={`/recipes/${r.id}`}
-                      className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-3 py-2 transition-colors hover:opacity-80"
-                    >
-                      <span className="font-medium text-text-heading">
-                        {r.title}
-                      </span>
-                      {typeof r.rating === "number" ? (
-                        <StarRatingDisplay value={r.rating} size="sm" />
-                      ) : null}
-                    </Link>
-                    <DeleteRecipeButton recipeId={r.id} recipeTitle={r.title} />
-                  </li>
-                );
-              })}
-            </ul>
-            {!q && filteredFavorites.length > favoritesLimit ? (
-              <button
-                type="button"
-                onClick={() => setFavoritesLimit((n) => n + FAVORITES_PAGE)}
-                className="mt-3 flex w-full items-center justify-center gap-2 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <FontAwesomeIcon icon={faChevronDown} className="h-3 w-3" aria-hidden />
-                Show {Math.min(FAVORITES_PAGE, filteredFavorites.length - favoritesLimit)} more
-              </button>
-            ) : null}
-            </>
-          )}
-        </section>
-      ) : null}
     </>
   );
 }
