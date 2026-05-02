@@ -44,15 +44,39 @@ export async function GET(request: NextRequest) {
     return new NextResponse("Only http/https URLs are allowed", { status: 400 });
   }
 
-  // Block requests to private/internal IP ranges
-  const hostname = parsed.hostname.toLowerCase();
+  // Block requests to private/internal IP ranges (SSRF protection).
+  // Covers IPv4 private ranges, link-local (including AWS/GCP metadata endpoint),
+  // loopback, and IPv6 equivalents.
+  const hostname = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, ""); // strip IPv6 brackets
   if (
     hostname === "localhost" ||
+    hostname === "0.0.0.0" ||
+    hostname === "::1" ||
+    hostname.endsWith(".local") ||
     hostname.startsWith("127.") ||
     hostname.startsWith("10.") ||
     hostname.startsWith("192.168.") ||
-    hostname === "0.0.0.0" ||
-    hostname.endsWith(".local")
+    hostname.startsWith("172.16.") ||
+    hostname.startsWith("172.17.") ||
+    hostname.startsWith("172.18.") ||
+    hostname.startsWith("172.19.") ||
+    hostname.startsWith("172.20.") ||
+    hostname.startsWith("172.21.") ||
+    hostname.startsWith("172.22.") ||
+    hostname.startsWith("172.23.") ||
+    hostname.startsWith("172.24.") ||
+    hostname.startsWith("172.25.") ||
+    hostname.startsWith("172.26.") ||
+    hostname.startsWith("172.27.") ||
+    hostname.startsWith("172.28.") ||
+    hostname.startsWith("172.29.") ||
+    hostname.startsWith("172.30.") ||
+    hostname.startsWith("172.31.") ||
+    hostname.startsWith("169.254.") || // link-local — includes AWS/GCP metadata (169.254.169.254)
+    hostname.startsWith("100.64.") ||  // carrier-grade NAT
+    hostname.startsWith("fe80:") ||    // IPv6 link-local
+    hostname.startsWith("fc") ||       // IPv6 unique local
+    hostname.startsWith("fd")          // IPv6 unique local
   ) {
     return new NextResponse("Forbidden", { status: 403 });
   }

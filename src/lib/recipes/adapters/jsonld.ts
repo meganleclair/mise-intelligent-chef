@@ -1,4 +1,5 @@
-import type { CleanRecipe, Ingredient, PrepItem, Step } from "@/lib/types/recipe";
+import type { CleanRecipe, Ingredient, Step } from "@/lib/types/recipe";
+import { inferPrepItems } from "@/lib/recipes/infer-prep-items";
 
 // ---------------------------------------------------------------------------
 // JSON-LD Recipe structured-data adapter
@@ -151,39 +152,6 @@ function mapSteps(lines: string[]): Step[] {
   return lines.map((text, i) => ({ id: `jl-st-${i}`, text, order: i }));
 }
 
-function inferPrepItems(steps: Step[]): PrepItem[] {
-  const text = steps.map((s) => s.text.toLowerCase()).join(" ");
-  const prep: PrepItem[] = [];
-  let sort = 0;
-  if (text.includes("overnight") || text.includes("soak")) {
-    prep.push({
-      id: "jl-prep-1",
-      text: "Check whether anything needs soaking or resting overnight.",
-      leadTimeMinutes: 720,
-      urgency: "overnight",
-      sortOrder: sort++,
-    });
-  }
-  if (text.includes("room temperature") || text.includes("soften butter")) {
-    prep.push({
-      id: "jl-prep-2",
-      text: "Pull cold ingredients to room temperature before you start.",
-      leadTimeMinutes: 30,
-      urgency: "before_start",
-      sortOrder: sort++,
-    });
-  }
-  if (prep.length === 0) {
-    prep.push({
-      id: "jl-prep-default",
-      text: "Read the full recipe once before you begin.",
-      urgency: "before_start",
-      sortOrder: 0,
-    });
-  }
-  return prep;
-}
-
 // ---------------------------------------------------------------------------
 // Main export
 // ---------------------------------------------------------------------------
@@ -241,7 +209,7 @@ export async function importRecipeJsonLd(url: string): Promise<CleanRecipe> {
   const ingredients = mapIngredients(ingredientLines);
   const stepLines = flattenInstructions(recipe.recipeInstructions);
   const steps = mapSteps(stepLines);
-  const prepItems = inferPrepItems(steps);
+  const prepItems = inferPrepItems(steps, "jl");
 
   return {
     title: recipe.name?.trim() || "Imported recipe",

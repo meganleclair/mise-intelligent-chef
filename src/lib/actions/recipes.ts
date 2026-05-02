@@ -16,15 +16,11 @@ export async function importAndSaveRecipe(url: string) {
     return { ok: false as const, error: "Sign in to import recipes." };
   }
 
-  console.log(`[importAndSaveRecipe] user=${user.id.slice(0, 8)}… url=${url.slice(0, 60)}`);
-
   const result = await importRecipeFromUrl(url);
   if (!result.ok) {
     console.error("[importAndSaveRecipe] import pipeline failed:", result.error);
     return result;
   }
-
-  console.log(`[importAndSaveRecipe] pipeline ok (${result.source}): "${result.recipe.title}"`);
 
   const r = result.recipe;
 
@@ -58,7 +54,6 @@ export async function importAndSaveRecipe(url: string) {
     return { ok: false as const, error: error?.message ?? "Could not save recipe." };
   }
 
-  console.log(`[importAndSaveRecipe] saved recipeId=${data.id}`);
   revalidatePath("/");
   revalidatePath("/kitchen");
   return { ok: true as const, recipeId: data.id, source: result.source };

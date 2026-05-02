@@ -1,5 +1,6 @@
 import type { CleanRecipe } from "@/lib/types/recipe";
-import type { Ingredient, PrepItem, Step } from "@/lib/types/recipe";
+import type { Ingredient, Step } from "@/lib/types/recipe";
+import { inferPrepItems } from "@/lib/recipes/infer-prep-items";
 
 type SpoonacularExtracted = {
   title?: string;
@@ -192,39 +193,6 @@ async function fetchRecipeInformationPayload(
   }
 }
 
-function inferPrepFromSteps(steps: Step[]): PrepItem[] {
-  const text = steps.map((s) => s.text.toLowerCase()).join(" ");
-  const prep: PrepItem[] = [];
-  let sort = 0;
-  if (text.includes("overnight") || text.includes("soak")) {
-    prep.push({
-      id: "prep-infer-1",
-      text: "Check whether anything needs soaking or resting overnight.",
-      leadTimeMinutes: 720,
-      urgency: "overnight",
-      sortOrder: sort++,
-    });
-  }
-  if (text.includes("room temperature") || text.includes("soften butter")) {
-    prep.push({
-      id: "prep-infer-2",
-      text: "Pull cold ingredients to room temperature before you start.",
-      leadTimeMinutes: 30,
-      urgency: "before_start",
-      sortOrder: sort++,
-    });
-  }
-  if (prep.length === 0) {
-    prep.push({
-      id: "prep-infer-default",
-      text: "Read the full recipe once before you begin.",
-      urgency: "before_start",
-      sortOrder: 0,
-    });
-  }
-  return prep;
-}
-
 /** Plain text from Spoonacular HTML summary + drop popularity / social tails (not a social product). */
 function summaryFromSpoonacularHtml(html: string): string {
   let s = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
@@ -277,7 +245,7 @@ export async function importRecipeSpoonacular(url: string): Promise<CleanRecipe>
       steps = preferRicherSteps(steps, infoSteps);
     }
   }
-  const prepItems = inferPrepFromSteps(steps);
+  const prepItems = inferPrepItems(steps, "sp");
 
   const summaryPlain = data.summary
     ? summaryFromSpoonacularHtml(data.summary)

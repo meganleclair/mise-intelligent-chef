@@ -154,7 +154,6 @@ export async function getRecentImports(limit = 6) {
     return [];
   }
 
-  console.log(`[getRecentImports] user=${user.id.slice(0, 8)}… returned ${data?.length ?? 0} rows`);
   return data ?? [];
 }
 

@@ -21,13 +21,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import type { SwapOption } from "@/app/api/swaps/route";
 
 // Swap trigger styles — applied directly to DialogTrigger so we don't nest
 // a <button> inside another <button> (invalid HTML / hydration error).
 const swapTriggerClass =
   "inline-flex shrink-0 items-center gap-1.5 rounded-md border border-primary/40 bg-secondary px-2.5 py-1 text-xs font-semibold text-text-heading shadow-sm transition-colors hover:border-primary/60 hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
-
-type SwapOption = { label: string; impactNote: string };
 
 type Props = {
   recipeId: string;

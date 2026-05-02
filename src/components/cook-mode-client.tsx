@@ -74,6 +74,7 @@ export function CookModeClient({
     initialRemaining(initialTimer),
   );
   const [minutes, setMinutes] = useState(10);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!timer) {
@@ -107,7 +108,8 @@ export function CookModeClient({
   useEffect(() => {
     if (isDemo) return;
     startTransition(async () => {
-      await startOrResumeCookSession(recipeId);
+      const res = await startOrResumeCookSession(recipeId);
+      if (!res.ok) setSyncError("Couldn't save your session. Check your connection.");
     });
   }, [recipeId, isDemo]);
 
@@ -130,9 +132,11 @@ export function CookModeClient({
       Math.max(0, stepIndex + delta),
     );
     setStepIndex(next);
+    setSyncError(null);
     if (isDemo) return;
     startTransition(async () => {
-      await updateCookStep(recipeId, next);
+      const res = await updateCookStep(recipeId, next);
+      if (!res.ok) setSyncError("Couldn't save your progress. Check your connection.");
       router.refresh();
     });
   }
@@ -149,7 +153,8 @@ export function CookModeClient({
     setRemainingSec(minutes * 60);
     if (isDemo) return;
     startTransition(async () => {
-      await updateCookTimer(recipeId, next);
+      const res = await updateCookTimer(recipeId, next);
+      if (!res.ok) setSyncError("Couldn't save the timer. Check your connection.");
       router.refresh();
     });
   }
@@ -159,7 +164,8 @@ export function CookModeClient({
     setRemainingSec(0);
     if (isDemo) return;
     startTransition(async () => {
-      await updateCookTimer(recipeId, null);
+      const res = await updateCookTimer(recipeId, null);
+      if (!res.ok) setSyncError("Couldn't clear the timer. Check your connection.");
       router.refresh();
     });
   }
@@ -289,6 +295,12 @@ export function CookModeClient({
             </p>
           ) : null}
         </div>
+
+        {syncError ? (
+          <p className="mx-auto mt-4 w-full max-w-xl text-center text-sm text-destructive" role="alert">
+            {syncError}
+          </p>
+        ) : null}
 
         <div className="mx-auto mt-10 flex w-full max-w-xl flex-wrap gap-3 pb-8">
           <Button

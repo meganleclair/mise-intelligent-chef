@@ -8,8 +8,6 @@ export type SwapOption = {
   impactNote: string;
 };
 
-const client = new Anthropic();
-
 export async function POST(request: NextRequest) {
   // Auth required — only signed-in users can trigger Claude calls.
   const supabase = await createSupabaseServerClient();
@@ -45,6 +43,10 @@ export async function POST(request: NextRequest) {
     // No key configured — caller falls back to static catalog
     return NextResponse.json({ options: [] });
   }
+
+  // Instantiate inside the handler so the constructor only runs after the key
+  // check — avoids a build-time throw if ANTHROPIC_API_KEY is absent.
+  const client = new Anthropic({ apiKey });
 
   try {
     const body = await request.json();
