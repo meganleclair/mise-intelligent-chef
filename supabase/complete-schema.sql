@@ -138,3 +138,13 @@ drop trigger if exists cook_sessions_updated_at on public.cook_sessions;
 create trigger cook_sessions_updated_at
   before update on public.cook_sessions
   for each row execute function public.set_updated_at();
+
+-- ── Data API grants ───────────────────────────────────────────
+-- Supabase no longer auto-exposes public schema tables to the Data API.
+-- Explicit GRANTs are required for PostgREST / supabase-js access.
+-- Deadline for existing projects: October 30 2026.
+-- Ref: https://github.com/orgs/supabase/discussions/45329
+grant all on public.profiles             to authenticated;
+grant all on public.recipes              to authenticated;
+grant all on public.recipe_modifications to authenticated;
+grant all on public.cook_sessions        to authenticated;
