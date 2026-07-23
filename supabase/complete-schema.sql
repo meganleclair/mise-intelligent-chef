@@ -104,8 +104,12 @@ create table if not exists public.recipe_nutrition_sessions (
 
 alter table public.recipe_nutrition_sessions enable row level security;
 
-create policy "Nutrition sessions own row" on public.recipe_nutrition_sessions
-  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='recipe_nutrition_sessions' and policyname='Nutrition sessions own row') then
+    create policy "Nutrition sessions own row" on public.recipe_nutrition_sessions
+      for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+  end if;
+end $$;
 
 drop trigger if exists recipe_nutrition_sessions_updated_at on public.recipe_nutrition_sessions;
 create trigger recipe_nutrition_sessions_updated_at
