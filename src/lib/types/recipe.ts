@@ -40,3 +40,21 @@ export type TimerState = {
   label: string | null;
   endsAt: string;
 } | null;
+
+export type IngredientOverride = {
+  original: string;
+  replacement: string;
+};
+
+export type MacroEstimate = {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+};
+
+export type ChatTurn = {
+  role: "user" | "assistant";
+  content: string;
+};
