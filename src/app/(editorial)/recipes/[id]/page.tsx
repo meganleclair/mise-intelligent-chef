@@ -2,13 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/components/favorite-button";
 import { RecipeRatingSection } from "@/components/recipe-rating-section";
-import { IngredientSwapSheet } from "@/components/ingredient-swap-sheet";
-import { RecipeGoalSwaps } from "@/components/recipe-goal-swaps";
+import { NutritionPanel } from "@/components/nutrition-panel";
 import { RecipeStepsReader } from "@/components/recipe-steps-reader";
-import { mergeIngredientsWithMods } from "@/lib/recipes/display";
+import { applyIngredientOverrides } from "@/lib/recipes/display";
 import { IngredientLine } from "@/components/ingredient-line";
 import { decodeHtmlEntities } from "@/lib/decode-html-entities";
-import { getModifications, getRecipeForUser } from "@/lib/data/queries";
+import { getNutritionSession, getRecipeForUser } from "@/lib/data/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SignInPrompt } from "@/components/sign-in-prompt";
 import { RecipeImageFallback } from "@/components/recipe-image-fallback";
@@ -31,8 +30,13 @@ export default async function RecipeDetailPage({ params }: Props) {
   const recipe = await getRecipeForUser(id);
   if (!recipe) notFound();
 
-  const mods = await getModifications(id);
-  const ingredients = mergeIngredientsWithMods(recipe.ingredients, mods);
+  const session = await getNutritionSession(id);
+  const workingState = {
+    servings: session?.servings ?? recipe.servings,
+    overrides: session?.ingredient_overrides ?? [],
+    macros: session?.macros ?? null,
+  };
+  const ingredients = applyIngredientOverrides(recipe.ingredients, workingState.overrides);
 
   const heroSrc = recipe.image_url
     ? normalizeImageUrl(recipe.image_url)
@@ -60,7 +64,7 @@ export default async function RecipeDetailPage({ params }: Props) {
         </h1>
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm text-muted-foreground">
-            Serves {recipe.servings}
+            Serves {workingState.servings}
           </span>
           <FavoriteButton recipeId={id} initialFavorite={recipe.favorite} />
         </div>
@@ -88,25 +92,21 @@ export default async function RecipeDetailPage({ params }: Props) {
         <h2 className="font-serif text-2xl text-text-heading">Ingredients</h2>
         <ul className="space-y-3 text-base leading-relaxed">
           {ingredients.map((ing) => (
-            <li key={ing.id} className="flex items-start gap-3">
-              <div className="min-w-0 flex-1">
-                <IngredientLine ingredient={ing} />
-              </div>
-              <div className="shrink-0 pt-0.5">
-                <IngredientSwapSheet
-                  recipeId={id}
-                  ingredient={ing}
-                  recipeName={recipe.title}
-                  allIngredientNames={ingredients.map((i) => i.name)}
-                />
-              </div>
+            <li key={ing.id}>
+              <IngredientLine ingredient={ing} />
             </li>
           ))}
         </ul>
       </section>
 
       <div className="mt-12 space-y-12">
-        <RecipeGoalSwaps recipeId={id} />
+        <NutritionPanel
+          recipeId={id}
+          recipeTitle={recipe.title}
+          ingredients={recipe.ingredients}
+          initialState={workingState}
+          initialRating={recipe.rating ?? null}
+        />
 
         <section className="space-y-4">
           <h2 className="font-serif text-2xl text-text-heading">Instructions</h2>
