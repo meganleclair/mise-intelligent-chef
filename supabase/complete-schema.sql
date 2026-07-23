@@ -62,6 +62,9 @@ do $$ begin
   end if;
 end $$;
 
+alter table public.recipes add column if not exists has_cooked boolean not null default false;
+alter table public.recipes add column if not exists first_cooked_at timestamptz;
+
 create index if not exists recipes_user_created on public.recipes (user_id, created_at desc);
 
 alter table public.recipes enable row level security;
@@ -87,32 +90,33 @@ create trigger recipes_updated_at
   before update on public.recipes
   for each row execute function public.set_updated_at();
 
--- ── recipe_modifications ──────────────────────────────────────
-create table if not exists public.recipe_modifications (
-  id                uuid primary key default gen_random_uuid(),
-  user_id           uuid not null references auth.users (id) on delete cascade,
-  recipe_id         uuid not null references public.recipes (id) on delete cascade,
-  ingredient_key    text not null,
-  replacement_label text not null,
-  impact_note       text,
-  created_at        timestamptz not null default now(),
-  unique (recipe_id, ingredient_key)
+-- ── recipe_nutrition_sessions ─────────────────────────────────
+create table if not exists public.recipe_nutrition_sessions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  recipe_id uuid not null references public.recipes (id) on delete cascade,
+  servings integer not null,
+  ingredient_overrides jsonb not null default '[]'::jsonb,
+  macros jsonb,
+  updated_at timestamptz not null default now(),
+  unique (user_id, recipe_id)
 );
 
-alter table public.recipe_modifications enable row level security;
+alter table public.recipe_nutrition_sessions enable row level security;
 
-do $$ begin
-  if not exists (select 1 from pg_policies where tablename='recipe_modifications' and policyname='Modifications own row') then
-    create policy "Modifications own row" on public.recipe_modifications
-      for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
-  end if;
-end $$;
+create policy "Nutrition sessions own row" on public.recipe_nutrition_sessions
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop trigger if exists recipe_nutrition_sessions_updated_at on public.recipe_nutrition_sessions;
+create trigger recipe_nutrition_sessions_updated_at
+  before update on public.recipe_nutrition_sessions
+  for each row execute function public.set_updated_at();
 
 -- ── Data API grants ───────────────────────────────────────────
 -- Supabase no longer auto-exposes public schema tables to the Data API.
 -- Explicit GRANTs are required for PostgREST / supabase-js access.
 -- Deadline for existing projects: October 30 2026.
 -- Ref: https://github.com/orgs/supabase/discussions/45329
-grant all on public.profiles             to authenticated;
-grant all on public.recipes              to authenticated;
-grant all on public.recipe_modifications to authenticated;
+grant all on public.profiles                  to authenticated;
+grant all on public.recipes                   to authenticated;
+grant all on public.recipe_nutrition_sessions to authenticated;
