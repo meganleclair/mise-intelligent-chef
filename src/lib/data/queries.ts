@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { Ingredient, PrepItem, Step } from "@/lib/types/recipe";
+import type { Ingredient, IngredientOverride, MacroEstimate, PrepItem, Step } from "@/lib/types/recipe";
 
 export type RecipeRow = {
   id: string;
@@ -13,12 +13,14 @@ export type RecipeRow = {
   prep_items: PrepItem[];
   favorite: boolean;
   rating: number | null;
+  has_cooked: boolean;
+  first_cooked_at: string | null;
 };
 
-export type ModificationRow = {
-  ingredient_key: string;
-  replacement_label: string;
-  impact_note: string | null;
+export type NutritionSessionRow = {
+  servings: number;
+  ingredient_overrides: IngredientOverride[];
+  macros: MacroEstimate | null;
 };
 
 export async function getRecipeForUser(recipeId: string) {
@@ -39,20 +41,21 @@ export async function getRecipeForUser(recipeId: string) {
   return data as RecipeRow;
 }
 
-export async function getModifications(recipeId: string) {
+export async function getNutritionSession(recipeId: string) {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return [];
+  if (!user) return null;
 
   const { data } = await supabase
-    .from("recipe_modifications")
-    .select("ingredient_key, replacement_label, impact_note")
+    .from("recipe_nutrition_sessions")
+    .select("servings, ingredient_overrides, macros")
     .eq("recipe_id", recipeId)
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .maybeSingle();
 
-  return (data ?? []) as ModificationRow[];
+  return (data as NutritionSessionRow | null) ?? null;
 }
 
 export async function getRecentImports(limit = 6) {
@@ -64,7 +67,7 @@ export async function getRecentImports(limit = 6) {
 
   const { data, error } = await supabase
     .from("recipes")
-    .select("id, title, image_url, created_at, favorite, rating")
+    .select("id, title, image_url, created_at, favorite, rating, has_cooked")
     .eq("user_id", user.id)
     .is("hidden_from_recent_at", null)
     .order("created_at", { ascending: false })
@@ -87,7 +90,7 @@ export async function getFavoriteRecipes() {
 
   const { data } = await supabase
     .from("recipes")
-    .select("id, title, image_url, created_at, rating")
+    .select("id, title, image_url, created_at, rating, has_cooked")
     .eq("user_id", user.id)
     .eq("favorite", true)
     .order("created_at", { ascending: false })
