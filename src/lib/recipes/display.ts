@@ -1,16 +1,5 @@
 import { decodeHtmlEntities } from "@/lib/decode-html-entities";
-import { isBatchShiftNote } from "@/lib/swap-catalog";
-import type { Ingredient } from "@/lib/types/recipe";
-
-/**
- * True when this line was swapped by hand (catalog picker), not by batch recipe shifts.
- */
-export function isManualIngredientSwap(note?: string | null): boolean {
-  const raw = note?.trim();
-  if (!raw?.startsWith("Swap:")) return false;
-  const body = raw.slice("Swap:".length).trim();
-  return !isBatchShiftNote(body);
-}
+import type { Ingredient, IngredientOverride } from "@/lib/types/recipe";
 
 /** Quantity + unit + name only (replacement line after a swap). */
 export function getIngredientPrimaryLine(ing: Ingredient): string {
@@ -33,32 +22,6 @@ export function getIngredientPrimaryLine(ing: Ingredient): string {
     .trim();
 
   return decodeHtmlEntities(structured || name);
-}
-
-/** Parses `mergeIngredientsWithMods` notes like `Swap: [Lower calorie shift] …`. */
-export function parseSwapNote(note?: string | null): {
-  shift?: string;
-  detail: string;
-} | null {
-  const raw = note?.trim();
-  if (!raw || !raw.startsWith("Swap:")) return null;
-  let body = raw.slice("Swap:".length).trim();
-  let shift: string | undefined;
-  const bracket = body.match(
-    /^\[(Higher protein|Lower calorie|Lower carb|Higher fiber|Lower sodium|Dairy-free) shift\]\s*/i,
-  );
-  if (bracket) {
-    const g = bracket[1]!.toLowerCase();
-    if (g === "higher protein") shift = "Higher protein";
-    else if (g === "lower calorie") shift = "Lower calorie";
-    else if (g === "lower carb") shift = "Lower carb";
-    else if (g === "higher fiber") shift = "Higher fiber";
-    else if (g === "lower sodium") shift = "Lower sodium";
-    else if (g === "dairy-free") shift = "Dairy-free";
-    body = body.slice(bracket[0].length).trim();
-  }
-  if (!body) return null;
-  return { shift, detail: body };
 }
 
 /**
@@ -89,12 +52,6 @@ export function formatIngredientLine(ing: Ingredient): string {
     return decodeHtmlEntities(structured || name);
   }
 
-  if (note.startsWith("Swap:")) {
-    return decodeHtmlEntities(
-      structured ? `${structured} — ${note}` : `${name} — ${note}`,
-    );
-  }
-
   const n = note.toLowerCase();
   const head = structured.slice(0, Math.min(16, structured.length)).toLowerCase();
   if (head && n.includes(head) && note.length >= structured.length * 0.75) {
@@ -115,28 +72,20 @@ export function formatIngredientLine(ing: Ingredient): string {
   );
 }
 
-export type ModRow = {
-  ingredient_key: string;
-  replacement_label: string;
-  impact_note: string | null;
-};
-
-export function mergeIngredientsWithMods(
+/** Applies the current nutrition-chat swaps to a recipe's ingredient list for display. */
+export function applyIngredientOverrides(
   ingredients: Ingredient[],
-  mods: ModRow[],
+  overrides: IngredientOverride[],
 ): Ingredient[] {
   const map = new Map(
-    mods.map((m) => [m.ingredient_key, m] as const),
+    overrides.map((o) => [o.original.trim().toLowerCase(), o] as const),
   );
   return ingredients.map((ing) => {
-    const m = map.get(ing.id);
-    if (!m) return ing;
+    const match = map.get(ing.name.trim().toLowerCase());
+    if (!match) return ing;
     return {
       ...ing,
-      name: m.replacement_label,
-      note: m.impact_note
-        ? `Swap: ${m.impact_note}`
-        : ing.note,
+      name: match.replacement,
       swapBasisName: ing.name,
     };
   });
