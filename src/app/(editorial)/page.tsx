@@ -1,11 +1,7 @@
 import Image from "next/image";
-import { ContinueCookingBanner } from "@/components/continue-cooking-banner";
 import { ImportRecipeForm } from "@/components/import-recipe-form";
 import { RecentImportsCards } from "@/components/recent-imports-cards";
-import {
-  getActiveCookSession,
-  getRecentImports,
-} from "@/lib/data/queries";
+import { getRecentImports } from "@/lib/data/queries";
 import { GetStartedDemoCards } from "@/components/get-started-demo-cards";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -17,21 +13,10 @@ export default async function HomePage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const [active, recentForCards] = await Promise.all([
-    getActiveCookSession(),
-    getRecentImports(6),
-  ]);
+  const recentForCards = await getRecentImports(6);
 
   return (
     <div className="mx-auto max-w-5xl px-6 pb-20 pt-10">
-      {active ? (
-        <ContinueCookingBanner
-          recipeId={active.recipeId}
-          recipeTitle={active.recipeTitle}
-          currentStepIndex={active.currentStepIndex}
-        />
-      ) : null}
-
       <section className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-14">
         <div className="space-y-6">
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
@@ -87,8 +72,7 @@ export default async function HomePage() {
             Try a Recipe
           </h2>
           <p className="text-sm text-muted-foreground">
-            No upload needed—open a full recipe and jump into prep or cook mode whenever
-            you like.
+            No upload needed—open a full recipe and start cooking whenever you like.
           </p>
         </div>
         <GetStartedDemoCards />

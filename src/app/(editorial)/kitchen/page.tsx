@@ -1,12 +1,7 @@
 import Link from "next/link";
-import { ContinueCookingBanner } from "@/components/continue-cooking-banner";
 import { KitchenRecipeLists } from "@/components/kitchen-recipe-lists";
 import { ImportRecipeForm } from "@/components/import-recipe-form";
-import {
-  getActiveCookSession,
-  getFavoriteRecipes,
-  getRecentImports,
-} from "@/lib/data/queries";
+import { getFavoriteRecipes, getRecentImports } from "@/lib/data/queries";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function KitchenPage() {
@@ -15,8 +10,7 @@ export default async function KitchenPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [active, recent, favorites] = await Promise.all([
-    getActiveCookSession(),
+  const [recent, favorites] = await Promise.all([
     getRecentImports(50),
     getFavoriteRecipes(),
   ]);
@@ -41,16 +35,6 @@ export default async function KitchenPage() {
           to see imported recipes and favorites here.
         </p>
       )}
-
-      {active ? (
-        <ContinueCookingBanner
-          recipeId={active.recipeId}
-          recipeTitle={active.recipeTitle}
-          currentStepIndex={active.currentStepIndex}
-          heading="Continue cooking"
-          ctaLabel="Resume"
-        />
-      ) : null}
 
       {user ? (
         <section className="mb-12 rounded-xl border border-border bg-muted/20 px-4 py-5 sm:px-6">

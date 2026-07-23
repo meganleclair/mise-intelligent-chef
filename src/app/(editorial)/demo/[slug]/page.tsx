@@ -124,38 +124,25 @@ export default async function DemoRecipePage({ params }: Props) {
         <section className="space-y-4">
           <h2 className="font-serif text-2xl text-text-heading">Instructions</h2>
           <p className="text-sm text-muted-foreground">
-            Full steps—same flow you&apos;ll see in cook mode, without splitting one
-            screen at a time.
+            Full steps, right where you&apos;re already reading.
           </p>
           <RecipeStepsReader steps={recipe.steps} />
         </section>
       </div>
 
-      <div className="mt-14 flex flex-col gap-3 sm:flex-row">
-        {prepOrdered.length > 0 ? (
+      {prepOrdered.length > 0 ? (
+        <div className="mt-14">
           <Link
             href={`/demo/${slug}#prep`}
             className={cn(
               buttonVariants({ size: "lg" }),
-              "min-h-12 flex-1 justify-center",
+              "min-h-12 w-full justify-center sm:w-auto",
             )}
           >
             Before you start
           </Link>
-        ) : null}
-        <Link
-          href={`/demo/${slug}/cook`}
-          className={cn(
-            buttonVariants({
-              size: "lg",
-              variant: prepOrdered.length > 0 ? "secondary" : "default",
-            }),
-            "min-h-12 flex-1 justify-center",
-          )}
-        >
-          Start cooking
-        </Link>
-      </div>
+        </div>
+      ) : null}
     </article>
   );
 }
