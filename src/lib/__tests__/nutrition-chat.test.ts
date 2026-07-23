@@ -1,12 +1,39 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import Anthropic from "@anthropic-ai/sdk";
 
 const mockCreate = vi.fn();
 
-vi.mock("@anthropic-ai/sdk", () => ({
-  default: vi.fn().mockImplementation(function () {
+vi.mock("@anthropic-ai/sdk", async () => {
+  const actual =
+    await vi.importActual<typeof import("@anthropic-ai/sdk")>("@anthropic-ai/sdk");
+  const MockAnthropic = vi.fn().mockImplementation(function () {
     return { messages: { create: mockCreate } };
-  }),
-}));
+  }) as unknown as typeof actual.default;
+  // Preserve the real error classes (AuthenticationError, BadRequestError, etc.)
+  // so `instanceof` checks in chat.ts still work against mocked rejections.
+  // These are inherited via the prototype chain on the real class (defined on
+  // BaseAnthropic), not own properties, so Object.assign wouldn't copy them —
+  // list them explicitly instead.
+  const errorClassNames = [
+    "AnthropicError",
+    "APIError",
+    "APIConnectionError",
+    "APIConnectionTimeoutError",
+    "APIUserAbortError",
+    "NotFoundError",
+    "ConflictError",
+    "RateLimitError",
+    "BadRequestError",
+    "AuthenticationError",
+    "InternalServerError",
+    "PermissionDeniedError",
+    "UnprocessableEntityError",
+  ] as const;
+  for (const name of errorClassNames) {
+    (MockAnthropic as unknown as Record<string, unknown>)[name] = actual.default[name];
+  }
+  return { default: MockAnthropic };
+});
 
 async function importChat() {
   vi.resetModules();
@@ -76,20 +103,75 @@ describe("runNutritionChat", () => {
     expect(mockCreate).toHaveBeenCalledTimes(3);
   });
 
-  it("throws NutritionChatError when the response has no JSON object", async () => {
-    mockCreate.mockResolvedValueOnce(textResponse("Sorry, I can't help with that."));
+  it("throws NutritionChatError when the response has no JSON object across all retries", async () => {
+    mockCreate.mockResolvedValue(textResponse("Sorry, I can't help with that."));
     const { runNutritionChat, NutritionChatError } = await importChat();
 
     await expect(runNutritionChat(BASE_PARAMS)).rejects.toThrow(NutritionChatError);
+    expect(mockCreate).toHaveBeenCalledTimes(3);
   });
 
-  it("throws NutritionChatError when required fields are missing", async () => {
-    mockCreate.mockResolvedValueOnce(
-      textResponse(JSON.stringify({ reply: "Sure." })),
+  it("throws NutritionChatError when required fields are missing across all retries", async () => {
+    mockCreate.mockResolvedValue(textResponse(JSON.stringify({ reply: "Sure." })));
+    const { runNutritionChat, NutritionChatError } = await importChat();
+
+    await expect(runNutritionChat(BASE_PARAMS)).rejects.toThrow(NutritionChatError);
+    expect(mockCreate).toHaveBeenCalledTimes(3);
+  });
+
+  it("recovers after a malformed response on the first attempt", async () => {
+    mockCreate
+      .mockResolvedValueOnce(textResponse("Sorry, I can't help with that."))
+      .mockResolvedValueOnce(textResponse(VALID_REPLY));
+    const { runNutritionChat } = await importChat();
+
+    const result = await runNutritionChat(BASE_PARAMS);
+
+    expect(result.reply).toBe("That cuts about 65 calories per batch.");
+    expect(mockCreate).toHaveBeenCalledTimes(2);
+  });
+
+  it("throws NutritionChatError after exactly one attempt on a non-retryable API error", async () => {
+    mockCreate.mockRejectedValue(
+      new Anthropic.AuthenticationError(
+        401,
+        {
+          type: "error",
+          error: { type: "authentication_error", message: "invalid x-api-key" },
+        },
+        "invalid x-api-key",
+        new Headers(),
+      ),
     );
     const { runNutritionChat, NutritionChatError } = await importChat();
 
     await expect(runNutritionChat(BASE_PARAMS)).rejects.toThrow(NutritionChatError);
+    expect(mockCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it("throws NutritionChatError when the response has an empty content array", async () => {
+    mockCreate.mockResolvedValue({ content: [] });
+    const { runNutritionChat, NutritionChatError } = await importChat();
+
+    await expect(runNutritionChat(BASE_PARAMS)).rejects.toThrow(NutritionChatError);
+    expect(mockCreate).toHaveBeenCalledTimes(3);
+  });
+
+  it("throws NutritionChatError when a macro sub-field has the wrong type", async () => {
+    mockCreate.mockResolvedValue(
+      textResponse(
+        JSON.stringify({
+          reply: "That cuts some calories.",
+          servings: 4,
+          overrides: [],
+          macros: { calories: 1200, protein: "sixty", carbs: 90, fat: 40, fiber: 20 },
+        }),
+      ),
+    );
+    const { runNutritionChat, NutritionChatError } = await importChat();
+
+    await expect(runNutritionChat(BASE_PARAMS)).rejects.toThrow(NutritionChatError);
+    expect(mockCreate).toHaveBeenCalledTimes(3);
   });
 
   it("throws NutritionChatError when ANTHROPIC_API_KEY is unset", async () => {

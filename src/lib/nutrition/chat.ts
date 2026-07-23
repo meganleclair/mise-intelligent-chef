@@ -22,12 +22,33 @@ export class NutritionChatError extends Error {}
 const MAX_ATTEMPTS = 3;
 const BACKOFF_MS = [300, 900];
 
+// Client errors that will never succeed on retry — the request itself is
+// invalid (bad key, bad payload, wrong permissions, missing resource, or a
+// request the API understood but rejected as unprocessable). Retrying these
+// just burns the backoff on something that can't recover.
+const NON_RETRYABLE_ERROR_CLASSES = [
+  Anthropic.AuthenticationError,
+  Anthropic.BadRequestError,
+  Anthropic.PermissionDeniedError,
+  Anthropic.NotFoundError,
+  Anthropic.UnprocessableEntityError,
+];
+
+function isNonRetryableApiError(err: unknown): boolean {
+  return NON_RETRYABLE_ERROR_CLASSES.some((cls) => err instanceof cls);
+}
+
 async function withRetries<T>(fn: () => Promise<T>): Promise<T> {
   let lastErr: unknown;
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     try {
       return await fn();
     } catch (err) {
+      if (isNonRetryableApiError(err)) {
+        throw new NutritionChatError(
+          err instanceof Error ? err.message : String(err),
+        );
+      }
       lastErr = err;
       if (attempt < MAX_ATTEMPTS - 1) {
         await new Promise((resolve) => setTimeout(resolve, BACKOFF_MS[attempt]));
@@ -35,9 +56,7 @@ async function withRetries<T>(fn: () => Promise<T>): Promise<T> {
     }
   }
   throw new NutritionChatError(
-    `Claude call failed after ${MAX_ATTEMPTS} attempts: ${
-      lastErr instanceof Error ? lastErr.message : String(lastErr)
-    }`,
+    lastErr instanceof Error ? lastErr.message : String(lastErr),
   );
 }
 
@@ -87,6 +106,82 @@ Rules:
 - If the user's message doesn't call for a swap, serving change, or macro question, keep servings/overrides/macros the same as they already are and just answer conversationally in "reply".`;
 }
 
+function isPlainOverride(value: unknown): value is IngredientOverride {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as Partial<IngredientOverride>).original === "string" &&
+    typeof (value as Partial<IngredientOverride>).replacement === "string"
+  );
+}
+
+function isValidMacroEstimate(value: unknown): value is MacroEstimate {
+  if (typeof value !== "object" || value === null) return false;
+  const m = value as Partial<MacroEstimate>;
+  return (
+    typeof m.calories === "number" &&
+    typeof m.protein === "number" &&
+    typeof m.carbs === "number" &&
+    typeof m.fat === "number" &&
+    typeof m.fiber === "number"
+  );
+}
+
+async function requestAndParse(
+  client: Anthropic,
+  prompt: string,
+): Promise<NutritionChatResult> {
+  const message = await client.messages.create({
+    model: "claude-haiku-4-5",
+    max_tokens: 1024,
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  const block = message.content[0];
+  if (!block || block.type !== "text") {
+    throw new NutritionChatError("Claude's response wasn't in the expected format.");
+  }
+  const text = block.text.trim();
+
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new NutritionChatError("Claude's response wasn't in the expected format.");
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch {
+    throw new NutritionChatError("Claude's response wasn't valid JSON.");
+  }
+
+  const p = parsed as Partial<{
+    reply: string;
+    servings: number;
+    overrides: unknown[];
+    macros: unknown;
+  }>;
+
+  if (
+    typeof p.reply !== "string" ||
+    typeof p.servings !== "number" ||
+    !Array.isArray(p.overrides) ||
+    !p.overrides.every(isPlainOverride) ||
+    !isValidMacroEstimate(p.macros)
+  ) {
+    throw new NutritionChatError("Claude's response was missing required fields.");
+  }
+
+  return {
+    reply: p.reply,
+    state: {
+      servings: p.servings,
+      overrides: p.overrides,
+      macros: p.macros,
+    },
+  };
+}
+
 export async function runNutritionChat(params: {
   recipeTitle: string;
   ingredients: Ingredient[];
@@ -108,51 +203,5 @@ export async function runNutritionChat(params: {
     params.userMessage,
   );
 
-  const message = await withRetries(() =>
-    client.messages.create({
-      model: "claude-haiku-4-5",
-      max_tokens: 1024,
-      messages: [{ role: "user", content: prompt }],
-    }),
-  );
-
-  const text =
-    message.content[0].type === "text" ? message.content[0].text.trim() : "";
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new NutritionChatError("Claude's response wasn't in the expected format.");
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(jsonMatch[0]);
-  } catch {
-    throw new NutritionChatError("Claude's response wasn't valid JSON.");
-  }
-
-  const p = parsed as Partial<{
-    reply: string;
-    servings: number;
-    overrides: IngredientOverride[];
-    macros: MacroEstimate;
-  }>;
-
-  if (
-    typeof p.reply !== "string" ||
-    typeof p.servings !== "number" ||
-    !Array.isArray(p.overrides) ||
-    !p.macros ||
-    typeof p.macros.calories !== "number"
-  ) {
-    throw new NutritionChatError("Claude's response was missing required fields.");
-  }
-
-  return {
-    reply: p.reply,
-    state: {
-      servings: p.servings,
-      overrides: p.overrides,
-      macros: p.macros,
-    },
-  };
+  return withRetries(() => requestAndParse(client, prompt));
 }
