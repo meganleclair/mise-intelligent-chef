@@ -1,29 +1,6 @@
 import { decodeHtmlEntities } from "@/lib/decode-html-entities";
 import type { Ingredient, IngredientOverride } from "@/lib/types/recipe";
 
-/** Quantity + unit + name only (replacement line after a swap). */
-export function getIngredientPrimaryLine(ing: Ingredient): string {
-  const qty = ing.quantity?.trim();
-  const unit = ing.unit?.trim();
-  const unitLower = unit?.toLowerCase() ?? "";
-  const name = (ing.name || "").trim();
-
-  // Legacy bad parses: amount + unit "to" + empty name (Spoonacular range bug). Re-import fixes it.
-  if (unitLower === "to" && !name && qty) {
-    return decodeHtmlEntities(
-      `Amount unclear (${qty} …). Re-import this recipe from home to refresh the full line.`,
-    );
-  }
-
-  const structured = [qty, unit, name]
-    .filter(Boolean)
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  return decodeHtmlEntities(structured || name);
-}
-
 /**
  * One readable line for an ingredient: avoids duplicating Spoonacular-style
  * "amount + unit + name" next to the full original string.
