@@ -108,37 +108,6 @@ do $$ begin
   end if;
 end $$;
 
--- ── cook_sessions ─────────────────────────────────────────────
-create table if not exists public.cook_sessions (
-  id                uuid primary key default gen_random_uuid(),
-  user_id           uuid not null references auth.users (id) on delete cascade,
-  recipe_id         uuid not null references public.recipes (id) on delete cascade,
-  current_step_index integer not null default 0,
-  servings          integer,
-  timer_state       jsonb,
-  started_at        timestamptz not null default now(),
-  updated_at        timestamptz not null default now(),
-  completed_at      timestamptz
-);
-
-create index if not exists cook_sessions_user_incomplete
-  on public.cook_sessions (user_id)
-  where completed_at is null;
-
-alter table public.cook_sessions enable row level security;
-
-do $$ begin
-  if not exists (select 1 from pg_policies where tablename='cook_sessions' and policyname='Sessions own row') then
-    create policy "Sessions own row" on public.cook_sessions
-      for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
-  end if;
-end $$;
-
-drop trigger if exists cook_sessions_updated_at on public.cook_sessions;
-create trigger cook_sessions_updated_at
-  before update on public.cook_sessions
-  for each row execute function public.set_updated_at();
-
 -- ── Data API grants ───────────────────────────────────────────
 -- Supabase no longer auto-exposes public schema tables to the Data API.
 -- Explicit GRANTs are required for PostgREST / supabase-js access.
@@ -147,4 +116,3 @@ create trigger cook_sessions_updated_at
 grant all on public.profiles             to authenticated;
 grant all on public.recipes              to authenticated;
 grant all on public.recipe_modifications to authenticated;
-grant all on public.cook_sessions        to authenticated;
