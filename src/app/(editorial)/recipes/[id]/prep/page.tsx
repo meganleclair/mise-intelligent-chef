@@ -51,13 +51,13 @@ export default async function PrepPage({ params }: Props) {
 
       <div className="mt-12 border-t border-border pt-8">
         <Link
-          href={`/recipes/${id}/cook`}
+          href={`/recipes/${id}`}
           className={cn(
             buttonVariants({ size: "lg" }),
             "inline-flex min-h-12 w-full justify-center sm:w-auto",
           )}
         >
-          Ready to cook
+          Continue to recipe
         </Link>
       </div>
     </div>

@@ -36,11 +36,6 @@ export type CleanRecipe = {
   spoonacularId?: number | null;
 };
 
-export type TimerState = {
-  label: string | null;
-  endsAt: string;
-} | null;
-
 export type IngredientOverride = {
   original: string;
   replacement: string;

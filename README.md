@@ -66,7 +66,7 @@ npm install
 npm run dev
 ```
 
-The app works fully without any API keys — the JSON-LD import adapter handles recipe URLs and the demo recipes demonstrate every feature. Without `ANTHROPIC_API_KEY`, recipe summaries are skipped silently and the nutrition chat shows a clear error instead of a response.
+The app works fully without any API keys — the JSON-LD import adapter handles recipe URLs and the demo recipes cover editorial browsing and instructions without needing to sign in. Nutrition chat is only available on signed-in recipes (`/recipes/[id]`), since it persists a `recipe_nutrition_sessions` row per user. Without `ANTHROPIC_API_KEY`, recipe summaries are skipped silently and the nutrition chat shows a clear error instead of a response.
 
 To enable the nutrition chat, recipe summaries, and Spoonacular imports, copy `.env.example` to `.env.local` and fill in your keys.
 
