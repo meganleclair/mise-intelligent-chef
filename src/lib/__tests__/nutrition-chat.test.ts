@@ -79,7 +79,7 @@ describe("runNutritionChat", () => {
     expect(result.state.overrides).toEqual([
       { original: "Olive oil", replacement: "1/3 cup olive oil" },
     ]);
-    expect(result.state.macros.calories).toBe(1200);
+    expect(result.state.macros?.calories).toBe(1200);
     expect(mockCreate).toHaveBeenCalledTimes(1);
   });
 
