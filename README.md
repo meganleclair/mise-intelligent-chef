@@ -2,7 +2,7 @@
 
 **A full-stack cooking app built around Claude.**
 
-Import any recipe URL, get AI-driven ingredient swaps tuned to real dietary shifts, work through a prep checklist, then cook one clear step at a time.
+Import any recipe URL, browse your kitchen, and talk through it with a recipe-scoped nutrition chat — swap ingredients, change servings, get updated macro estimates, all in one conversation with Claude.
 
 → [Live app](https://miseintelligentchef.netlify.app) · [Portfolio case study](https://meganleclairdesign.com/projects/mise)
 
@@ -14,9 +14,7 @@ Recipe websites are built for traffic, not cooking. Mise strips the friction out
 
 **Editorial mode** — Import any URL, browse your kitchen, plan what to cook.
 
-**Cook mode** — One step at a time. Ingredients narrow to just what's relevant to the current step. Timer persists across tab switches and refreshes. Swap any ingredient without losing your place.
-
-**AI ingredient swaps (Claude)** — A slide-up sheet powered by Claude Haiku generates 2–3 substitutions per ingredient, focused on real dietary shifts: dairy-free, lower calorie, lower carb, higher protein. Quality is enforced at the prompt level — cheap neutral oils are explicitly banned, combinations are encouraged (e.g. cream cheese + whole milk for heavy cream), and Claude receives the full ingredient list as context so suggestions are grounded in the actual dish.
+**Nutrition chat (Claude)** — A recipe-scoped chat, backed by Claude Haiku: ask "what if I used chickpeas instead?" or "what's this at 6 servings?" and get an updated macro estimate (calories, protein, carbs, fat, fiber) alongside a conversational answer — the same back-and-forth you'd have with a general chat AI, but grounded in the actual recipe. Rough estimates, not tracking-app precision — swap suggestions and serving-size math happen in the same conversation instead of two separate tools.
 
 ---
 
@@ -32,13 +30,9 @@ Recipe websites are built for traffic, not cooking. Mise strips the friction out
 
 Recipe images route through `/api/image-proxy`, which fetches with a browser `User-Agent` and sets `Referer` to the source hostname — bypassing hotlink protection silently. Private IP ranges are blocked. Images are validated by content-type, capped at 8MB, and cached for 7 days.
 
-### Session model
+### Nutrition session model
 
-Cook sessions persist to Supabase (`cook_sessions`). Timer state is stored as a fixed `endsAt` timestamp — not a countdown counter — so a background tab or phone lock doesn't drift the clock.
-
-### Step-ingredient matching
-
-`getIngredientsForStep()` matches ingredient names against step text. Strict matching misses paraphrased ingredients; loose matching shows too much. The solution: show everything when confidence is low and flag it explicitly. Honest beats clever.
+One "current version" per recipe persists to Supabase (`recipe_nutrition_sessions`) — servings, active ingredient swaps, and the last-estimated macros. The live conversation itself isn't persisted; only this resulting state is, restored the next time you open the recipe.
 
 ---
 
@@ -57,7 +51,7 @@ Cook sessions persist to Supabase (`cook_sessions`). Timer state is stored as a 
 
 ## What building it surfaced
 
-**Prompt scope matters more than prompt cleverness.** The Claude swap prompt went through several iterations. The breakthrough wasn't better positive instructions — it was tighter exclusions. Explicitly telling Claude what *not* to suggest (cheap neutral oils, aromatic vegetables that aren't swap candidates) produced dramatically more useful output than rewording what it *should* suggest.
+**State belongs in the prompt, not just conversation history.** The nutrition-chat prompt asks Claude to return the full current list of active ingredient swaps every turn — not just what changed — so servings and substitutions stay consistent across a multi-turn conversation without extra merge logic on the server.
 
 **Context makes AI suggestions credible.** Sending only the ingredient name produced generic results. Sending the full recipe ingredient list alongside it gave Claude enough context to reason about what a substitution actually does to the dish.
 
@@ -72,9 +66,9 @@ npm install
 npm run dev
 ```
 
-The app works fully without any API keys — the JSON-LD import adapter handles recipe URLs, the demo recipes demonstrate every feature, and the AI swap endpoint falls back gracefully when `ANTHROPIC_API_KEY` isn't set.
+The app works fully without any API keys — the JSON-LD import adapter handles recipe URLs and the demo recipes demonstrate every feature. Without `ANTHROPIC_API_KEY`, recipe summaries are skipped silently and the nutrition chat shows a clear error instead of a response.
 
-To enable Claude-powered swaps and Spoonacular imports, copy `.env.local.example` and fill in your keys.
+To enable the nutrition chat, recipe summaries, and Spoonacular imports, copy `.env.example` to `.env.local` and fill in your keys.
 
 ---
 
