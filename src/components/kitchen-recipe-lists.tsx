@@ -5,11 +5,13 @@ import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { KitchenFavoriteButton } from "@/components/kitchen-favorite-button";
+import { CookedToggleButton } from "@/components/cooked-toggle-button";
 import { RemoveFromRecentButton } from "@/components/remove-from-recent-button";
 import { DeleteRecipeButton } from "@/components/delete-recipe-button";
 import { StarRatingDisplay } from "@/components/star-rating";
 import { RecipeImageFallback } from "@/components/recipe-image-fallback";
 import { normalizeImageUrl } from "@/lib/images";
+import { cn } from "@/lib/utils";
 
 type RecentRecipe = {
   id: string;
@@ -17,6 +19,7 @@ type RecentRecipe = {
   image_url: string | null;
   favorite: boolean | null;
   rating: number | null;
+  has_cooked: boolean;
 };
 
 type FavoriteRecipe = {
@@ -24,6 +27,7 @@ type FavoriteRecipe = {
   title: string;
   image_url: string | null;
   rating: number | null;
+  has_cooked: boolean;
 };
 
 type Props = {
@@ -35,18 +39,27 @@ type Props = {
 const RECENT_PAGE = 8;
 const FAVORITES_PAGE = 12;
 
+type CookedFilter = "all" | "not_cooked" | "cooked";
+
 export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
   const [query, setQuery] = useState("");
+  const [cookedFilter, setCookedFilter] = useState<CookedFilter>("all");
   const [recentLimit, setRecentLimit] = useState(RECENT_PAGE);
   const [favoritesLimit, setFavoritesLimit] = useState(FAVORITES_PAGE);
   const q = query.toLowerCase().trim();
 
-  const filteredRecent = q
-    ? recent.filter((r) => r.title.toLowerCase().includes(q))
-    : recent;
-  const filteredFavorites = q
-    ? favorites.filter((r) => r.title.toLowerCase().includes(q))
-    : favorites;
+  function matchesCookedFilter(hasCooked: boolean) {
+    if (cookedFilter === "all") return true;
+    if (cookedFilter === "cooked") return hasCooked;
+    return !hasCooked;
+  }
+
+  const filteredRecent = recent
+    .filter((r) => matchesCookedFilter(r.has_cooked))
+    .filter((r) => (q ? r.title.toLowerCase().includes(q) : true));
+  const filteredFavorites = favorites
+    .filter((r) => matchesCookedFilter(r.has_cooked))
+    .filter((r) => (q ? r.title.toLowerCase().includes(q) : true));
 
   // When searching, show all results; otherwise respect the pagination limit
   const visibleRecent = q ? filteredRecent : filteredRecent.slice(0, recentLimit);
@@ -56,6 +69,26 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
 
   return (
     <>
+      {hasAny ? (
+        <div className="mb-6 flex gap-2">
+          {(["all", "not_cooked", "cooked"] as const).map((f) => (
+            <button
+              key={f}
+              type="button"
+              onClick={() => setCookedFilter(f)}
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                cookedFilter === f
+                  ? "border-primary bg-primary/10 text-text-heading"
+                  : "border-border text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {f === "all" ? "All" : f === "not_cooked" ? "Not yet cooked" : "Cooked"}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       {hasAny ? (
         <div className="relative mb-8">
           <FontAwesomeIcon
@@ -78,10 +111,10 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
         <section className="mb-12">
           <h2 className="mb-4 font-serif text-xl text-text-heading">
             Favorites
-</h2>
+          </h2>
           {filteredFavorites.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No favorites match &ldquo;{query}&rdquo;.
+              Nothing here for this filter.
             </p>
           ) : (
             <>
@@ -111,6 +144,7 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
                         <StarRatingDisplay value={r.rating} size="sm" />
                       ) : null}
                     </Link>
+                    <CookedToggleButton recipeId={r.id} initialCooked={r.has_cooked} />
                     <DeleteRecipeButton recipeId={r.id} recipeTitle={r.title} />
                   </li>
                 );
@@ -143,7 +177,7 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
           </p>
         ) : filteredRecent.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No recent recipes match &ldquo;{query}&rdquo;.
+            Nothing here for this filter.
           </p>
         ) : (
           <>
@@ -173,6 +207,7 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
                       <StarRatingDisplay value={r.rating} size="sm" />
                     ) : null}
                   </Link>
+                  <CookedToggleButton recipeId={r.id} initialCooked={r.has_cooked} />
                   <KitchenFavoriteButton
                     recipeId={r.id}
                     initialFavorite={r.favorite ?? false}
