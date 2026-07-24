@@ -80,39 +80,47 @@ export function NutritionPanel({
     setOpen(nextOpen);
   }
 
-  async function send(text: string) {
+  async function send(text: string, opts?: { skipAppend?: boolean }) {
     const trimmed = text.trim();
     if (!trimmed || sending) return;
 
     setSending(true);
     setError(null);
-    const nextMessages: ChatTurn[] = [...messages, { role: "user", content: trimmed }];
-    setMessages(nextMessages);
-    setInput("");
 
-    const result = await sendChatMessage({
-      recipeId,
-      state: working,
-      history: messages,
-      userMessage: trimmed,
-    });
-
-    setSending(false);
-
-    if ("error" in result) {
-      setError(result.error);
-      return;
+    const nextMessages: ChatTurn[] = opts?.skipAppend
+      ? messages
+      : [...messages, { role: "user", content: trimmed }];
+    if (!opts?.skipAppend) {
+      setMessages(nextMessages);
+      setInput("");
     }
 
-    setWorking(result.state);
-    setMessages([...nextMessages, { role: "assistant", content: result.reply }]);
+    try {
+      const result = await sendChatMessage({
+        recipeId,
+        state: working,
+        history: opts?.skipAppend ? messages.slice(0, -1) : messages,
+        userMessage: trimmed,
+      });
+
+      if ("error" in result) {
+        setError(result.error);
+        return;
+      }
+
+      setWorking(result.state);
+      setMessages([...nextMessages, { role: "assistant", content: result.reply }]);
+    } catch {
+      setError("Something went wrong reaching the nutrition chat. Try again.");
+    } finally {
+      setSending(false);
+    }
   }
 
   function retryLast() {
     const lastUser = [...messages].reverse().find((m) => m.role === "user");
     if (!lastUser) return;
-    setMessages((prev) => prev.slice(0, -1));
-    void send(lastUser.content);
+    void send(lastUser.content, { skipAppend: true });
   }
 
   function adjustServings(delta: number) {
@@ -127,13 +135,18 @@ export function NutritionPanel({
   async function doneCooking() {
     setSending(true);
     setError(null);
-    const res = await saveNutritionSession(recipeId, working);
-    setSending(false);
-    if (!res.ok) {
-      setError(res.error);
-      return;
+    try {
+      const res = await saveNutritionSession(recipeId, working);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setShowRating(true);
+    } catch {
+      setError("Something went wrong saving your changes. Try again.");
+    } finally {
+      setSending(false);
     }
-    setShowRating(true);
   }
 
   function finishAfterRating() {
