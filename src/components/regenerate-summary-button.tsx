@@ -35,7 +35,7 @@ export function RegenerateSummaryButton({ recipeId }: Props) {
         type="button"
         onClick={regenerate}
         disabled={pending}
-        title="Rewrite description with Claude"
+        title="Rewrite description with Sous"
         className={cn(
           "inline-flex items-center gap-1.5 text-xs text-muted-foreground underline-offset-4",
           "hover:text-foreground hover:underline transition-colors",
@@ -47,7 +47,7 @@ export function RegenerateSummaryButton({ recipeId }: Props) {
           className={cn("h-3 w-3 shrink-0", pending && "animate-spin")}
           aria-hidden
         />
-        {pending ? "Rewriting…" : done ? "Done" : "Rewrite with Claude"}
+        {pending ? "Rewriting…" : done ? "Done" : "Rewrite with Sous"}
       </button>
       {error ? (
         <span className="text-xs text-destructive" role="alert">

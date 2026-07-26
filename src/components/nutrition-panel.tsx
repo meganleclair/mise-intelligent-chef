@@ -161,10 +161,13 @@ export function NutritionPanel({
       <SheetTrigger
         render={<Button size="lg" className="min-h-12 w-full justify-center sm:w-auto" />}
       >
-        Cook with Claude
+        Cook with Sous
       </SheetTrigger>
       <SheetContent side="right" className="w-full sm:max-w-md">
         <SheetHeader>
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Chatting with Sous
+          </p>
           <SheetTitle>{decodeHtmlEntities(recipeTitle)}</SheetTitle>
         </SheetHeader>
 

@@ -139,20 +139,20 @@ async function requestAndParse(
 
   const block = message.content[0];
   if (!block || block.type !== "text") {
-    throw new NutritionChatError("Claude's response wasn't in the expected format.");
+    throw new NutritionChatError("Sous's response wasn't in the expected format.");
   }
   const text = block.text.trim();
 
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    throw new NutritionChatError("Claude's response wasn't in the expected format.");
+    throw new NutritionChatError("Sous's response wasn't in the expected format.");
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(jsonMatch[0]);
   } catch {
-    throw new NutritionChatError("Claude's response wasn't valid JSON.");
+    throw new NutritionChatError("Sous's response wasn't valid JSON.");
   }
 
   const p = parsed as Partial<{
@@ -169,7 +169,7 @@ async function requestAndParse(
     !p.overrides.every(isPlainOverride) ||
     !isValidMacroEstimate(p.macros)
   ) {
-    throw new NutritionChatError("Claude's response was missing required fields.");
+    throw new NutritionChatError("Sous's response was missing required fields.");
   }
 
   return {

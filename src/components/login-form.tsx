@@ -16,7 +16,7 @@ type Mode = "signin" | "signup" | "forgot";
 function friendlyAuthError(message: string): string {
   const m = message.toLowerCase();
   if (m.includes("email not confirmed") || m.includes("not confirmed")) {
-    return "This email isn’t confirmed yet. Open the confirmation message Supabase sent you (check spam), click the link, then sign in here.";
+    return "This email isn’t confirmed yet. Open the confirmation message we sent you (check spam), click the link, then sign in here.";
   }
   if (m.includes("invalid login credentials") || m.includes("invalid_credentials")) {
     return "That email or password doesn’t match an account. Try again, or use “Create an account” / “Forgot password”.";
@@ -101,7 +101,7 @@ export function LoginForm({ nextPath }: Props) {
       }
       setPending(false);
       setInfo(
-        "We created your account, but Supabase still needs you to confirm your email before you can sign in. Check your inbox and spam for a message with a confirmation link. After you click it, come back here and sign in.",
+        "We created your account, but you still need to confirm your email before you can sign in. Check your inbox and spam for a message with a confirmation link. After you click it, come back here and sign in.",
       );
     } catch (caught) {
       setPending(false);
