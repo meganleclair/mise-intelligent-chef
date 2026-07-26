@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { RecipeStepsReader } from "@/components/recipe-steps-reader";
 import { IngredientLine } from "@/components/ingredient-line";
+import { NutritionPanel } from "@/components/nutrition-panel";
 import { decodeHtmlEntities } from "@/lib/decode-html-entities";
 import { tidyRecipeSummaryForDisplay } from "@/lib/recipes/summary";
 import { RecipeImageFallback } from "@/components/recipe-image-fallback";
@@ -82,6 +83,14 @@ export default async function DemoRecipePage({ params }: Props) {
       </section>
 
       <div className="mt-12 space-y-12">
+        <NutritionPanel
+          recipeTitle={recipe.title}
+          ingredients={recipe.ingredients}
+          initialState={{ servings: recipe.servings, overrides: [], macros: null }}
+          initialRating={null}
+          isDemo
+        />
+
         <section className="space-y-4">
           <h2 className="font-heading text-2xl text-text-heading">Instructions</h2>
           <p className="text-sm text-muted-foreground">

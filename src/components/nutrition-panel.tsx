@@ -31,19 +31,38 @@ type WorkingState = {
 };
 
 type Props = {
-  recipeId: string;
+  /** Real recipeId in the database. Omit for demo/"Try a Recipe" mode. */
+  recipeId?: string;
   recipeTitle: string;
   ingredients: Ingredient[];
   initialState: WorkingState;
   initialRating: number | null;
+  /**
+   * Demo/"Try a Recipe" mode: no signed-in user, no DB row to attach a
+   * session to. Same live chat, but nothing is ever saved — no Done
+   * Cooking step, no rating. Exit just discards the working conversation.
+   */
+  isDemo?: boolean;
 };
 
-async function sendChatMessage(params: {
-  recipeId: string;
-  state: WorkingState;
-  history: ChatTurn[];
-  userMessage: string;
-}): Promise<{ reply: string; state: WorkingState } | { error: string }> {
+type SendChatParams =
+  | {
+      recipeId: string;
+      state: WorkingState;
+      history: ChatTurn[];
+      userMessage: string;
+    }
+  | {
+      recipeTitle: string;
+      ingredients: Ingredient[];
+      state: WorkingState;
+      history: ChatTurn[];
+      userMessage: string;
+    };
+
+async function sendChatMessage(
+  params: SendChatParams,
+): Promise<{ reply: string; state: WorkingState } | { error: string }> {
   const res = await fetch("/api/nutrition-chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -62,6 +81,7 @@ export function NutritionPanel({
   ingredients,
   initialState,
   initialRating,
+  isDemo = false,
 }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -98,12 +118,22 @@ export function NutritionPanel({
     }
 
     try {
-      const result = await sendChatMessage({
-        recipeId,
-        state: working,
-        history: opts?.skipAppend ? messages.slice(0, -1) : messages,
-        userMessage: trimmed,
-      });
+      const result = await sendChatMessage(
+        isDemo
+          ? {
+              recipeTitle,
+              ingredients,
+              state: working,
+              history: opts?.skipAppend ? messages.slice(0, -1) : messages,
+              userMessage: trimmed,
+            }
+          : {
+              recipeId: recipeId!,
+              state: working,
+              history: opts?.skipAppend ? messages.slice(0, -1) : messages,
+              userMessage: trimmed,
+            },
+      );
 
       if ("error" in result) {
         setError(result.error);
@@ -135,6 +165,7 @@ export function NutritionPanel({
   }
 
   async function doneCooking() {
+    if (isDemo || !recipeId) return;
     setSending(true);
     setError(null);
     try {
@@ -179,7 +210,9 @@ export function NutritionPanel({
           {showRating ? (
             <div className="space-y-4 py-6 text-center">
               <p className="font-heading text-lg text-text-heading">Nice work!</p>
-              <RecipeRatingSection recipeId={recipeId} initialRating={initialRating} />
+              {/* showRating only ever becomes true via doneCooking(), which
+                  early-returns in demo mode, so recipeId is always set here. */}
+              <RecipeRatingSection recipeId={recipeId!} initialRating={initialRating} />
               <Button size="lg" className="mt-4 min-h-12 w-full" onClick={finishAfterRating}>
                 Done
               </Button>
@@ -317,16 +350,18 @@ export function NutritionPanel({
             <div className="flex gap-2">
               <Button
                 type="button"
-                variant="secondary"
+                variant={isDemo ? "default" : "secondary"}
                 className="flex-1"
                 disabled={sending}
                 onClick={() => resetForOpen(false)}
               >
                 Exit
               </Button>
-              <Button type="button" className="flex-1" disabled={sending} onClick={doneCooking}>
-                Done Cooking
-              </Button>
+              {isDemo ? null : (
+                <Button type="button" className="flex-1" disabled={sending} onClick={doneCooking}>
+                  Done Cooking
+                </Button>
+              )}
             </div>
           </SheetFooter>
         ) : null}
