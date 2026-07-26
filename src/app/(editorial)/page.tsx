@@ -102,16 +102,16 @@ export default async function HomePage() {
             >
               <DuotoneIcon icon={icon} className="mx-auto h-6 w-6 text-primary" aria-hidden />
               <p className="font-heading text-sm text-text-heading">{title}</p>
-              <p className="text-xs leading-relaxed text-muted-foreground">{example}</p>
+              <p className="text-xs italic leading-relaxed text-muted-foreground">{example}</p>
             </div>
           ))}
         </div>
 
-        <div className="mx-auto mt-8 max-w-md space-y-2 rounded-2xl bg-primary p-5 text-left">
-          <p className="text-[11px] uppercase tracking-[0.1em] text-primary-foreground/70">
+        <div className="mx-auto mt-8 max-w-md space-y-2 rounded-2xl bg-foreground p-5 text-left">
+          <p className="text-[11px] uppercase tracking-[0.1em] text-accent-yellow">
             Sous says
           </p>
-          <p className="text-sm leading-relaxed text-primary-foreground">
+          <p className="font-heading text-sm italic leading-relaxed text-background">
             Chickpeas work great here—slightly firmer bite, about 40 more grams
             of protein per batch. Want the macros at 6 servings instead of 4?
           </p>

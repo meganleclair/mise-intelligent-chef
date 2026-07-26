@@ -78,7 +78,7 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
               type="button"
               onClick={() => setCookedFilter(f)}
               className={cn(
-                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                "rounded-md border px-3 py-1 text-xs font-medium transition-colors",
                 cookedFilter === f
                   ? "border-primary bg-primary/10 text-text-heading"
                   : "border-border text-muted-foreground hover:text-foreground",

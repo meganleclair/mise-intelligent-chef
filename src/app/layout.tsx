@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Fredoka, Capriola, Geist_Mono } from "next/font/google";
+import { DM_Sans, PT_Serif, Geist_Mono } from "next/font/google";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import "./globals.css";
 
@@ -8,16 +8,10 @@ const dmSans = DM_Sans({
   subsets: ["latin"],
 });
 
-const fredoka = Fredoka({
-  variable: "--font-fredoka",
+const ptSerif = PT_Serif({
+  variable: "--font-pt-serif",
   subsets: ["latin"],
   weight: ["700"],
-});
-
-const capriola = Capriola({
-  variable: "--font-capriola",
-  subsets: ["latin"],
-  weight: "400",
 });
 
 const geistMono = Geist_Mono({
@@ -39,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${dmSans.variable} ${fredoka.variable} ${capriola.variable} ${geistMono.variable} h-full`}
+      className={`${dmSans.variable} ${ptSerif.variable} ${geistMono.variable} h-full`}
     >
       <body className="min-h-full flex flex-col font-sans">{children}</body>
     </html>
