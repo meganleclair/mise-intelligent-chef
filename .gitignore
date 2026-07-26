@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Font Awesome Pro npm auth token — never commit
+.npmrc
+
 # brainstorming visual companion
 .superpowers/
 
