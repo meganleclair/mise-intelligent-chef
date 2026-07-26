@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RecipeStepsReader } from "@/components/recipe-steps-reader";
 import { IngredientLine } from "@/components/ingredient-line";
@@ -7,19 +6,9 @@ import { decodeHtmlEntities } from "@/lib/decode-html-entities";
 import { tidyRecipeSummaryForDisplay } from "@/lib/recipes/summary";
 import { RecipeImageFallback } from "@/components/recipe-image-fallback";
 import { normalizeImageUrl } from "@/lib/images";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { DEMO_LIST, getDemoRecipe } from "@/lib/demo-recipes/catalog";
-import type { PrepUrgency } from "@/lib/types/recipe";
 
 type Props = { params: Promise<{ slug: string }> };
-
-function urgencyLabel(u: PrepUrgency | undefined) {
-  if (!u) return null;
-  if (u === "before_start") return "Before you start";
-  if (u === "same_day") return "Same day";
-  return "Overnight / ahead";
-}
 
 export function generateStaticParams() {
   return DEMO_LIST.map(({ slug }) => ({ slug }));
@@ -42,9 +31,6 @@ export default async function DemoRecipePage({ params }: Props) {
 
   const { recipe } = demo;
   const heroSrc = recipe.imageUrl ? normalizeImageUrl(recipe.imageUrl) : null;
-  const prepOrdered = [...recipe.prepItems].sort(
-    (a, b) => a.sortOrder - b.sortOrder,
-  );
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-10">
@@ -96,34 +82,6 @@ export default async function DemoRecipePage({ params }: Props) {
       </section>
 
       <div className="mt-12 space-y-12">
-        {prepOrdered.length > 0 ? (
-          <section id="prep" className="scroll-mt-24 space-y-4">
-            <h2 className="font-serif text-2xl text-text-heading">
-              Before you start
-            </h2>
-            <ul className="space-y-4">
-              {prepOrdered.map((item) => {
-                const label = urgencyLabel(item.urgency);
-                return (
-                  <li
-                    key={item.id}
-                    className="border-l-2 border-border pl-4 text-base leading-relaxed"
-                  >
-                    {label ? (
-                      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        {label}
-                      </p>
-                    ) : null}
-                    <p className="whitespace-pre-wrap text-text-heading">
-                      {decodeHtmlEntities(item.text)}
-                    </p>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        ) : null}
-
         <section className="space-y-4">
           <h2 className="font-serif text-2xl text-text-heading">Instructions</h2>
           <p className="text-sm text-muted-foreground">
@@ -132,20 +90,6 @@ export default async function DemoRecipePage({ params }: Props) {
           <RecipeStepsReader steps={recipe.steps} />
         </section>
       </div>
-
-      {prepOrdered.length > 0 ? (
-        <div className="mt-14">
-          <Link
-            href={`/demo/${slug}#prep`}
-            className={cn(
-              buttonVariants({ size: "lg" }),
-              "min-h-12 w-full justify-center sm:w-auto",
-            )}
-          >
-            Before you start
-          </Link>
-        </div>
-      ) : null}
     </article>
   );
 }

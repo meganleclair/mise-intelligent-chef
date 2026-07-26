@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FavoriteButton } from "@/components/favorite-button";
 import { RecipeRatingSection } from "@/components/recipe-rating-section";
@@ -12,8 +11,6 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SignInPrompt } from "@/components/sign-in-prompt";
 import { RecipeImageFallback } from "@/components/recipe-image-fallback";
 import { normalizeImageUrl } from "@/lib/images";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -54,7 +51,7 @@ export default async function RecipeDetailPage({ params }: Props) {
           </h1>
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-sm text-muted-foreground">
-              Serves {workingState.servings}
+              Serves {recipe.servings} as written — open Sous to adjust.
             </span>
             <FavoriteButton recipeId={id} initialFavorite={recipe.favorite} />
           </div>
@@ -118,18 +115,6 @@ export default async function RecipeDetailPage({ params }: Props) {
           </p>
           <RecipeStepsReader steps={recipe.steps} />
         </section>
-      </div>
-
-      <div className="mt-14">
-        <Link
-          href={`/recipes/${id}/prep`}
-          className={cn(
-            buttonVariants({ size: "lg" }),
-            "min-h-12 w-full justify-center sm:w-auto",
-          )}
-        >
-          Before you start
-        </Link>
       </div>
     </article>
   );
