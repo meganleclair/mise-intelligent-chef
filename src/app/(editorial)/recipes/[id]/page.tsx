@@ -44,49 +44,52 @@ export default async function RecipeDetailPage({ params }: Props) {
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-10">
-      {heroSrc ? (
-        <div className="relative mb-10 h-48 w-full overflow-hidden rounded-sm bg-muted sm:h-56">
-          <RecipeImageFallback
-            src={heroSrc}
-            className="absolute inset-0 h-full w-full"
-            loading="eager"
-            size="lg"
-          />
-        </div>
-      ) : null}
-
-      <header className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          Recipe
-        </p>
-        <h1 className="font-serif text-4xl text-text-heading">
-          {decodeHtmlEntities(recipe.title)}
-        </h1>
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="text-sm text-muted-foreground">
-            Serves {workingState.servings}
-          </span>
-          <FavoriteButton recipeId={id} initialFavorite={recipe.favorite} />
-        </div>
-        <RecipeRatingSection
-          key={`${id}-rating-${recipe.rating ?? "none"}`}
-          recipeId={id}
-          initialRating={recipe.rating ?? null}
-        />
-        {recipe.source_url ? (
-          <p className="text-sm text-muted-foreground">
-            Source:{" "}
-            <a
-              href={recipe.source_url}
-              className="underline underline-offset-4 hover:text-foreground"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Original link
-            </a>
+      <div className="flex flex-col-reverse gap-8 sm:flex-row sm:items-start">
+        <header className="flex-1 space-y-4">
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Recipe
           </p>
+          <h1 className="font-serif text-4xl text-text-heading">
+            {decodeHtmlEntities(recipe.title)}
+          </h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm text-muted-foreground">
+              Serves {workingState.servings}
+            </span>
+            <FavoriteButton recipeId={id} initialFavorite={recipe.favorite} />
+          </div>
+          <RecipeRatingSection
+            key={`${id}-rating-${recipe.rating ?? "none"}`}
+            recipeId={id}
+            initialRating={recipe.rating ?? null}
+          />
+          {recipe.source_url ? (
+            <p className="text-sm text-muted-foreground">
+              Source:{" "}
+              <a
+                href={recipe.source_url}
+                className="underline underline-offset-4 hover:text-foreground"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Original link
+              </a>
+            </p>
+          ) : null}
+        </header>
+        {heroSrc ? (
+          <div className="relative aspect-[4/5] w-full shrink-0 overflow-hidden rounded-sm bg-muted sm:w-48 lg:w-56">
+            <RecipeImageFallback
+              src={heroSrc}
+              className="absolute inset-0 h-full w-full"
+              loading="eager"
+              size="lg"
+              sizes="(max-width: 640px) 100vw, 224px"
+              quality={90}
+            />
+          </div>
         ) : null}
-      </header>
+      </div>
 
       <section className="mt-12 space-y-4">
         <h2 className="font-serif text-2xl text-text-heading">Ingredients</h2>

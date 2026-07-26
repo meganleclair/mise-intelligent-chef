@@ -48,38 +48,41 @@ export default async function DemoRecipePage({ params }: Props) {
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-10">
-      {heroSrc ? (
-        <div className="relative mb-10 aspect-[16/10] w-full overflow-hidden rounded-sm bg-muted">
-          <RecipeImageFallback
-            src={heroSrc}
-            className="absolute inset-0 h-full w-full"
-            loading="eager"
-            size="lg"
-          />
-        </div>
-      ) : null}
-
-      <header className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          Recipe
-        </p>
-        <h1 className="font-serif text-4xl text-text-heading">
-          {decodeHtmlEntities(recipe.title)}
-        </h1>
-        {recipe.summary ? (
-          <p className="break-words text-lg leading-relaxed text-muted-foreground">
-            {decodeHtmlEntities(tidyRecipeSummaryForDisplay(recipe.summary))}
+      <div className="flex flex-col-reverse gap-8 sm:flex-row sm:items-start">
+        <header className="flex-1 space-y-4">
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Recipe
           </p>
+          <h1 className="font-serif text-4xl text-text-heading">
+            {decodeHtmlEntities(recipe.title)}
+          </h1>
+          {recipe.summary ? (
+            <p className="break-words text-lg leading-relaxed text-muted-foreground">
+              {decodeHtmlEntities(tidyRecipeSummaryForDisplay(recipe.summary))}
+            </p>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm text-muted-foreground">
+              Serves {recipe.servings}
+            </span>
+            <span className="rounded-md border border-border bg-muted/40 px-2 py-0.5 text-xs text-muted-foreground">
+              No account required
+            </span>
+          </div>
+        </header>
+        {heroSrc ? (
+          <div className="relative aspect-[4/5] w-full shrink-0 overflow-hidden rounded-sm bg-muted sm:w-48 lg:w-56">
+            <RecipeImageFallback
+              src={heroSrc}
+              className="absolute inset-0 h-full w-full"
+              loading="eager"
+              size="lg"
+              sizes="(max-width: 640px) 100vw, 224px"
+              quality={90}
+            />
+          </div>
         ) : null}
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="text-sm text-muted-foreground">
-            Serves {recipe.servings}
-          </span>
-          <span className="rounded-md border border-border bg-muted/40 px-2 py-0.5 text-xs text-muted-foreground">
-            No account required
-          </span>
-        </div>
-      </header>
+      </div>
 
       <section className="mt-12 space-y-4">
         <h2 className="font-serif text-2xl text-text-heading">Ingredients</h2>

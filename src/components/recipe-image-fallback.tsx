@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons";
@@ -27,6 +28,8 @@ type Props = {
   imageClassName?: string;
   loading?: "eager" | "lazy";
   size?: keyof typeof iconSize;
+  sizes?: string;
+  quality?: number;
 };
 
 /**
@@ -39,6 +42,8 @@ export function RecipeImageFallback({
   imageClassName,
   loading = "lazy",
   size = "md",
+  sizes = "100vw",
+  quality = 85,
 }: Props) {
   const [failed, setFailed] = useState(false);
   const showPlaceholder = !src || failed;
@@ -47,16 +52,14 @@ export function RecipeImageFallback({
   return (
     <div className={cn("relative bg-muted", className)}>
       {src && !failed ? (
-        // eslint-disable-next-line @next/next/no-img-element -- proxied through /api/image-proxy
-        <img
+        <Image
           src={toProxiedSrc(src)}
           alt={alt}
-          className={cn(
-            "absolute inset-0 h-full w-full object-cover",
-            imageClassName,
-          )}
+          fill
+          sizes={sizes}
+          quality={quality}
           loading={loading}
-          decoding="async"
+          className={cn("object-cover", imageClassName)}
           onError={() => setFailed(true)}
         />
       ) : null}
