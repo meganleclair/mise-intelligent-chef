@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Fredoka, Capriola, Geist_Mono } from "next/font/google";
+import "@fortawesome/fontawesome-svg-core/styles.css";
 import "./globals.css";
 
 const dmSans = DM_Sans({
