@@ -11,7 +11,7 @@ export function RecipeStepsReader({ steps }: Props) {
       {ordered.map((step, index) => (
         <li key={step.id} className="flex gap-5 sm:gap-8">
           <span
-            className="font-serif text-2xl tabular-nums text-muted-foreground sm:text-3xl"
+            className="font-heading text-2xl tabular-nums text-muted-foreground sm:text-3xl"
             aria-hidden
           >
             {index + 1}

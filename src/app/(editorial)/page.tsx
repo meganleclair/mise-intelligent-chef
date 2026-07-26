@@ -19,10 +19,10 @@ export default async function HomePage() {
     <div className="mx-auto max-w-5xl px-6 pb-20 pt-10">
       <section className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-14">
         <div className="space-y-6">
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="font-wordmark text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Mise
           </p>
-          <h1 className="font-serif text-4xl leading-tight text-text-heading sm:text-5xl">
+          <h1 className="font-heading text-4xl leading-tight text-text-heading sm:text-5xl">
             A calmer way to cook the internet.
           </h1>
           <p className="max-w-md text-lg leading-relaxed text-muted-foreground">
@@ -57,10 +57,10 @@ export default async function HomePage() {
       <section className="mt-20 rounded-2xl border border-border bg-muted/20 px-6 py-10 sm:px-10">
         <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-14">
           <div className="space-y-4">
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            <p className="font-wordmark text-xs uppercase tracking-[0.2em] text-muted-foreground">
               Meet Sous
             </p>
-            <h2 className="font-serif text-3xl text-text-heading">
+            <h2 className="font-heading text-3xl text-text-heading">
               Your cooking companion, right inside every recipe.
             </h2>
             <p className="text-base leading-relaxed text-muted-foreground">
@@ -85,7 +85,7 @@ export default async function HomePage() {
 
       <section className="mt-20 border-t border-border pt-14">
         <div className="mb-8 space-y-2">
-          <h2 className="font-serif text-2xl text-text-heading">
+          <h2 className="font-heading text-2xl text-text-heading">
             Recently Imported
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -97,7 +97,7 @@ export default async function HomePage() {
 
       <section className="mt-20 border-t border-border pt-14">
         <div className="mb-8 space-y-2">
-          <h2 className="font-serif text-2xl text-text-heading">
+          <h2 className="font-heading text-2xl text-text-heading">
             Try a Recipe
           </h2>
           <p className="text-sm text-muted-foreground">

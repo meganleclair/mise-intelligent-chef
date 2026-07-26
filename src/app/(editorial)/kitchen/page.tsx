@@ -18,7 +18,7 @@ export default async function KitchenPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
       <header className="mb-10 space-y-2">
-        <h1 className="font-serif text-3xl text-text-heading">My kitchen</h1>
+        <h1 className="font-heading text-3xl text-text-heading">My kitchen</h1>
         <p className="text-muted-foreground">
           A quiet shelf for what you&apos;re cooking—not a crowded dashboard.
         </p>
@@ -38,7 +38,7 @@ export default async function KitchenPage() {
 
       {user ? (
         <section className="mb-12 rounded-xl border border-border bg-muted/20 px-4 py-5 sm:px-6">
-          <h2 className="mb-3 font-serif text-xl text-text-heading">Import a recipe</h2>
+          <h2 className="mb-3 font-heading text-xl text-text-heading">Import a recipe</h2>
           <ImportRecipeForm />
         </section>
       ) : null}

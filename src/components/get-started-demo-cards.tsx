@@ -40,7 +40,7 @@ export function GetStartedDemoCards() {
                   </span>
                 </div>
                 <CardHeader className="pb-2">
-                  <CardTitle className="line-clamp-2 font-serif text-base text-text-heading">
+                  <CardTitle className="line-clamp-2 font-heading text-base text-text-heading">
                     {decodeHtmlEntities(c.title)}
                   </CardTitle>
                 </CardHeader>

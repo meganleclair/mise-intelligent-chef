@@ -62,7 +62,7 @@ export function RecentImportsCards({ recipes, isLoggedIn = true }: Props) {
                   />
                 </div>
                 <CardHeader className="pb-2">
-                  <CardTitle className="line-clamp-2 font-serif text-base text-text-heading">
+                  <CardTitle className="line-clamp-2 font-heading text-base text-text-heading">
                     {decodeHtmlEntities(r.title)}
                   </CardTitle>
                 </CardHeader>

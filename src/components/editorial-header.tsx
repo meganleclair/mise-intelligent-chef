@@ -13,7 +13,7 @@ export async function EditorialHeader() {
   return (
     <header className="border-b border-border/80 bg-background/90 backdrop-blur-sm">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-5">
-        <Link href="/" className="font-serif text-xl tracking-tight text-text-heading">
+        <Link href="/" className="font-wordmark text-xl tracking-tight text-text-heading">
           Mise
         </Link>
         <nav className="flex items-center gap-6 text-sm text-muted-foreground">

@@ -13,7 +13,7 @@ export default async function LoginPage({ searchParams }: Props) {
     <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-6 py-16">
       <div className="w-full max-w-sm space-y-8">
         <div className="space-y-2 text-center">
-          <p className="font-serif text-2xl text-text-heading">Mise</p>
+          <p className="font-wordmark text-2xl text-text-heading">Mise</p>
           <p className="text-sm text-muted-foreground">
             Sign in with email and password, or create an account.
           </p>

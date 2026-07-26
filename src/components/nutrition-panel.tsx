@@ -174,7 +174,7 @@ export function NutritionPanel({
         <div className="flex-1 space-y-6 overflow-y-auto px-4">
           {showRating ? (
             <div className="space-y-4 py-6 text-center">
-              <p className="font-serif text-lg text-text-heading">Nice work!</p>
+              <p className="font-heading text-lg text-text-heading">Nice work!</p>
               <RecipeRatingSection recipeId={recipeId} initialRating={initialRating} />
               <Button size="lg" className="mt-4 min-h-12 w-full" onClick={finishAfterRating}>
                 Done

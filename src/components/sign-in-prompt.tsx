@@ -16,7 +16,7 @@ export function SignInPrompt({
   const href = `/login?next=${encodeURIComponent(nextPath)}`;
   return (
     <div className="mx-auto max-w-md px-6 py-20 text-center">
-      <h1 className="font-serif text-2xl text-text-heading">{title}</h1>
+      <h1 className="font-heading text-2xl text-text-heading">{title}</h1>
       <p className="mt-3 text-sm text-muted-foreground">{description}</p>
       <Link href={href} className={cn(buttonVariants(), "mt-6 inline-flex")}>
         Sign in

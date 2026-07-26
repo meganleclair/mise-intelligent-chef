@@ -46,7 +46,7 @@ export default async function RecipeDetailPage({ params }: Props) {
           <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Recipe
           </p>
-          <h1 className="font-serif text-4xl text-text-heading">
+          <h1 className="font-heading text-4xl text-text-heading">
             {decodeHtmlEntities(recipe.title)}
           </h1>
           <div className="flex flex-wrap items-center gap-3">
@@ -89,7 +89,7 @@ export default async function RecipeDetailPage({ params }: Props) {
       </div>
 
       <section className="mt-12 space-y-4">
-        <h2 className="font-serif text-2xl text-text-heading">Ingredients</h2>
+        <h2 className="font-heading text-2xl text-text-heading">Ingredients</h2>
         <ul className="space-y-3 text-base leading-relaxed">
           {ingredients.map((ing) => (
             <li key={ing.id}>
@@ -109,7 +109,7 @@ export default async function RecipeDetailPage({ params }: Props) {
         />
 
         <section className="space-y-4">
-          <h2 className="font-serif text-2xl text-text-heading">Instructions</h2>
+          <h2 className="font-heading text-2xl text-text-heading">Instructions</h2>
           <p className="text-sm text-muted-foreground">
             Full steps, right where you&apos;re already reading.
           </p>
