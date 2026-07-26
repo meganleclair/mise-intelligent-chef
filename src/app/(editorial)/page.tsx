@@ -1,5 +1,13 @@
 import Image from "next/image";
-import { faHatChef } from "@fortawesome/pro-duotone-svg-icons";
+import {
+  faHatChef,
+  faArrowRightArrowLeft,
+  faBowlFood,
+  faChartSimple,
+  faDownload,
+  faClockRotateLeft,
+  faBookOpen,
+} from "@fortawesome/pro-duotone-svg-icons";
 import { DuotoneIcon } from "@/components/duotone-icon";
 import { DecorativeSwirl } from "@/components/decorative-swirl";
 import { ImportRecipeForm } from "@/components/import-recipe-form";
@@ -12,6 +20,24 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 const HOME_HERO_IMAGE =
   "https://images.unsplash.com/photo-1611270629569-8b357cb88da9?auto=format&fit=crop&w=2560&q=90";
 
+const SOUS_CAPABILITIES = [
+  {
+    icon: faArrowRightArrowLeft,
+    title: "Swap anything",
+    example: "“What if I used chickpeas instead of white beans?”",
+  },
+  {
+    icon: faBowlFood,
+    title: "Resize on the fly",
+    example: "“Make this work for 6 servings instead of 4.”",
+  },
+  {
+    icon: faChartSimple,
+    title: "Real macros",
+    example: "Calories, protein, carbs, fat, fiber—updated as you go.",
+  },
+] as const;
+
 export default async function HomePage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -19,28 +45,22 @@ export default async function HomePage() {
   const recentForCards = await getRecentImports(6);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 pb-20 pt-10">
-      <section className="relative grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-14">
+    <div className="mx-auto max-w-5xl px-6 pb-24 pt-10">
+      <section className="relative space-y-10 text-center">
         <DecorativeSwirl className="pointer-events-none absolute -top-10 right-10 h-44 w-44" />
-        <div className="space-y-6">
+        <div className="mx-auto max-w-xl space-y-6">
           <p className="font-wordmark text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Mise
           </p>
           <h1 className="font-heading text-4xl leading-tight text-text-heading sm:text-5xl">
             A calmer way to cook the internet.
           </h1>
-          <p className="max-w-md text-lg leading-relaxed text-muted-foreground">
-            Import a recipe, see what needs to happen before you start, then chat
-            with Sous to make it healthier—without losing what makes it good.
+          <p className="text-lg leading-relaxed text-muted-foreground">
+            Import any recipe, then chat with Sous to make it healthier—without
+            losing what makes it good.
           </p>
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-text-heading">
-              Import a recipe URL
-            </p>
-            <ImportRecipeForm />
-          </div>
         </div>
-        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm bg-muted">
+        <div className="relative mx-auto aspect-[21/9] w-full max-w-3xl overflow-hidden rounded-2xl bg-muted">
           <Image
             src={HOME_HERO_IMAGE}
             alt=""
@@ -48,7 +68,7 @@ export default async function HomePage() {
             className="object-cover"
             priority
             quality={92}
-            sizes="(max-width: 1024px) 100vw, min(528px, 42vw)"
+            sizes="(max-width: 1024px) 100vw, 768px"
           />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 to-transparent p-6">
             <p className="text-center text-sm leading-relaxed text-white/95">
@@ -58,40 +78,65 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="relative mt-20 overflow-hidden rounded-2xl border border-border bg-muted/20 px-6 py-10 sm:px-10">
+      <section className="relative mt-28 overflow-hidden rounded-2xl border border-border bg-muted/20 px-6 py-16 text-center sm:px-10">
         <DecorativeSwirl className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56" />
-        <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-14">
-          <div className="space-y-4">
-            <p className="font-wordmark flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              <DuotoneIcon icon={faHatChef} className="h-3.5 w-3.5" aria-hidden />
-              Meet Sous
-            </p>
-            <h2 className="font-heading text-3xl text-text-heading">
-              Your cooking companion, right inside every recipe.
-            </h2>
-            <p className="text-base leading-relaxed text-muted-foreground">
-              Ask Sous anything—swap an ingredient, change the serving size, ask
-              what&apos;s actually in it—and get a real answer plus an updated
-              calorie, protein, carb, fat, and fiber estimate. One honest
-              conversation, not a canned list of substitutions.
-            </p>
-          </div>
-          <div className="space-y-2 rounded-xl border border-border bg-card p-4 sm:p-5">
-            <p className="ml-auto max-w-[85%] rounded-lg bg-primary/10 px-3 py-2 text-sm">
-              What if I used chickpeas instead of white beans?
-            </p>
-            <p className="mr-auto max-w-[85%] rounded-lg bg-muted px-3 py-2 text-sm">
-              Chickpeas work great here—slightly firmer bite, about 40 more
-              grams of protein per batch. Want the macros at 6 servings
-              instead of 4?
-            </p>
-          </div>
+        <div className="mx-auto max-w-xl space-y-4">
+          <p className="font-wordmark flex items-center justify-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            <DuotoneIcon icon={faHatChef} className="h-3.5 w-3.5" aria-hidden />
+            Meet Sous
+          </p>
+          <h2 className="font-heading text-3xl text-text-heading">
+            Your AI cooking companion.
+          </h2>
+          <p className="text-base leading-relaxed text-muted-foreground">
+            Not a canned list of substitutions—an actual conversation about your
+            recipe, grounded in what you&apos;re really cooking.
+          </p>
+        </div>
+
+        <div className="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-3">
+          {SOUS_CAPABILITIES.map(({ icon, title, example }) => (
+            <div
+              key={title}
+              className="space-y-2 rounded-2xl bg-card p-6 text-center"
+            >
+              <DuotoneIcon icon={icon} className="mx-auto h-6 w-6 text-primary" aria-hidden />
+              <p className="font-heading text-sm text-text-heading">{title}</p>
+              <p className="text-xs leading-relaxed text-muted-foreground">{example}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mx-auto mt-8 max-w-md space-y-2 rounded-2xl bg-primary p-5 text-left">
+          <p className="text-[11px] uppercase tracking-[0.1em] text-primary-foreground/70">
+            Sous says
+          </p>
+          <p className="text-sm leading-relaxed text-primary-foreground">
+            Chickpeas work great here—slightly firmer bite, about 40 more grams
+            of protein per batch. Want the macros at 6 servings instead of 4?
+          </p>
         </div>
       </section>
 
-      <section className="mt-20 border-t border-border pt-14">
-        <div className="mb-8 space-y-2">
+      <section className="mt-28 border-t border-border pt-16 text-center">
+        <div className="mx-auto max-w-md space-y-2">
+          <p className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            <DuotoneIcon icon={faDownload} className="h-3.5 w-3.5" aria-hidden />
+            Get started
+          </p>
           <h2 className="font-heading text-2xl text-text-heading">
+            Import a recipe URL.
+          </h2>
+        </div>
+        <div className="mx-auto mt-6 max-w-md">
+          <ImportRecipeForm />
+        </div>
+      </section>
+
+      <section className="mt-28 border-t border-border pt-16">
+        <div className="mb-8 space-y-2">
+          <h2 className="flex items-center gap-2 font-heading text-2xl text-text-heading">
+            <DuotoneIcon icon={faClockRotateLeft} className="h-5 w-5 text-primary" aria-hidden />
             Recently Imported
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -101,13 +146,14 @@ export default async function HomePage() {
         <RecentImportsCards recipes={recentForCards} isLoggedIn={Boolean(user)} />
       </section>
 
-      <section className="mt-20 border-t border-border pt-14">
+      <section className="mt-28 border-t border-border pt-16">
         <div className="mb-8 space-y-2">
-          <h2 className="font-heading text-2xl text-text-heading">
+          <h2 className="flex items-center gap-2 font-heading text-2xl text-text-heading">
+            <DuotoneIcon icon={faBookOpen} className="h-5 w-5 text-primary" aria-hidden />
             Try a Recipe
           </h2>
           <p className="text-sm text-muted-foreground">
-            No upload needed—open a full recipe and start cooking whenever you like.
+            No upload needed—three demo recipes, Sous included, no account required.
           </p>
         </div>
         <GetStartedDemoCards />
