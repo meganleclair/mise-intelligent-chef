@@ -86,7 +86,7 @@
   --chart-3: #F3DCD3;
   --chart-4: #D9647A;
   --chart-5: #C93B5C;
-  --radius: 0.5rem;
+  --radius: 1.25rem;
   --sidebar: #EDE0CE;
   --sidebar-foreground: var(--text-heading);
   --sidebar-primary: var(--accent-chocolate);
