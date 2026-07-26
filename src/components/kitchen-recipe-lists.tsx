@@ -172,7 +172,7 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
         </h2>
         {recent.length === 0 ? (
           <div className="relative overflow-hidden rounded-xl border border-border bg-muted/20 px-6 py-10 text-center">
-            <DecorativeSwirl className="pointer-events-none absolute -top-8 left-1/2 h-40 w-40 -translate-x-1/2" />
+            <DecorativeSwirl className="pointer-events-none absolute -top-8 left-1/2 h-40 w-40 -translate-x-1/2 rotate-12" />
             <p className="relative text-sm text-muted-foreground">
               {isLoggedIn
                 ? "Nothing here yet—import a recipe above."

@@ -5,9 +5,10 @@ type Props = {
 };
 
 /**
- * Thin single-stroke swirl/ellipse line art, used as a low-opacity background
- * accent behind hero sections and empty states. Purely decorative — always
- * `aria-hidden`, absolutely positioned by the caller via `className`.
+ * Thin single-stroke spiral squiggle line art, used as a low-opacity
+ * background accent behind hero sections and empty states. Purely
+ * decorative — always `aria-hidden`, absolutely positioned by the caller
+ * via `className`.
  */
 export function DecorativeSwirl({ className }: Props) {
   return (
@@ -16,14 +17,12 @@ export function DecorativeSwirl({ className }: Props) {
       className={cn("pointer-events-none text-text-heading/20", className)}
       aria-hidden
     >
-      <ellipse
-        cx="90"
-        cy="90"
-        rx="70"
-        ry="90"
+      <path
+        d="M100 30 C130 30, 155 55, 155 90 C155 125, 125 150, 90 150 C60 150, 35 128, 40 100 C44 78, 68 65, 85 78 C98 88, 95 108, 80 112"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1"
+        strokeWidth="1.5"
+        strokeLinecap="round"
       />
     </svg>
   );

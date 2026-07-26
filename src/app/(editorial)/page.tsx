@@ -47,7 +47,8 @@ export default async function HomePage() {
   return (
     <div className="mx-auto max-w-5xl px-6 pb-24 pt-10">
       <section className="relative space-y-10 text-center">
-        <DecorativeSwirl className="pointer-events-none absolute -top-10 right-10 h-44 w-44" />
+        <DecorativeSwirl className="pointer-events-none absolute -top-10 right-10 h-44 w-44 rotate-6" />
+        <DecorativeSwirl className="pointer-events-none absolute -bottom-4 left-0 h-24 w-24 rotate-45 opacity-70" />
         <div className="mx-auto max-w-xl space-y-6">
           <p className="font-wordmark text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Mise
@@ -79,7 +80,8 @@ export default async function HomePage() {
       </section>
 
       <section className="relative mt-28 overflow-hidden rounded-2xl border border-border bg-muted/20 px-6 py-16 text-center sm:px-10">
-        <DecorativeSwirl className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56" />
+        <DecorativeSwirl className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 -rotate-12" />
+        <DecorativeSwirl className="pointer-events-none absolute -top-10 right-0 h-32 w-32 -rotate-12" />
         <div className="mx-auto max-w-xl space-y-4">
           <p className="font-wordmark flex items-center justify-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
             <DuotoneIcon icon={faHatChef} className="h-3.5 w-3.5" aria-hidden />
@@ -112,13 +114,14 @@ export default async function HomePage() {
             Sous says
           </p>
           <p className="font-heading text-sm italic leading-relaxed text-background">
-            Chickpeas work great here—slightly firmer bite, about 40 more grams
-            of protein per batch. Want the macros at 6 servings instead of 4?
+            Chickpeas work great here—slightly firmer bite, and the protein
+            comes out about the same. Want the macros at 6 servings instead of 4?
           </p>
         </div>
       </section>
 
-      <section className="mt-28 border-t border-border pt-16 text-center">
+      <section className="relative mt-28 border-t border-border pt-16 text-center">
+        <DecorativeSwirl className="pointer-events-none absolute -top-4 right-6 h-28 w-28 rotate-12" />
         <div className="mx-auto max-w-md space-y-2">
           <p className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
             <DuotoneIcon icon={faDownload} className="h-3.5 w-3.5" aria-hidden />
@@ -133,7 +136,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mt-28 border-t border-border pt-16">
+      <section className="relative mt-28 border-t border-border pt-16">
+        <DecorativeSwirl className="pointer-events-none absolute -bottom-10 -right-8 h-32 w-32 -rotate-6" />
         <div className="mb-8 space-y-2">
           <h2 className="flex items-center gap-2 font-heading text-2xl text-text-heading">
             <DuotoneIcon icon={faClockRotateLeft} className="h-5 w-5 text-primary" aria-hidden />
@@ -146,7 +150,8 @@ export default async function HomePage() {
         <RecentImportsCards recipes={recentForCards} isLoggedIn={Boolean(user)} />
       </section>
 
-      <section className="mt-28 border-t border-border pt-16">
+      <section className="relative mt-28 border-t border-border pt-16">
+        <DecorativeSwirl className="pointer-events-none absolute -top-6 left-1/2 h-24 w-24 -translate-x-1/2 rotate-45" />
         <div className="mb-8 space-y-2">
           <h2 className="flex items-center gap-2 font-heading text-2xl text-text-heading">
             <DuotoneIcon icon={faBookOpen} className="h-5 w-5 text-primary" aria-hidden />
