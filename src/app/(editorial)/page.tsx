@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { faHatChef } from "@fortawesome/pro-duotone-svg-icons";
+import { DuotoneIcon } from "@/components/duotone-icon";
 import { ImportRecipeForm } from "@/components/import-recipe-form";
 import { RecentImportsCards } from "@/components/recent-imports-cards";
 import { getRecentImports } from "@/lib/data/queries";
@@ -57,7 +59,8 @@ export default async function HomePage() {
       <section className="mt-20 rounded-2xl border border-border bg-muted/20 px-6 py-10 sm:px-10">
         <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-14">
           <div className="space-y-4">
-            <p className="font-wordmark text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            <p className="font-wordmark flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              <DuotoneIcon icon={faHatChef} className="h-3.5 w-3.5" aria-hidden />
               Meet Sous
             </p>
             <h2 className="font-heading text-3xl text-text-heading">

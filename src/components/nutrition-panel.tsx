@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { faHatChef } from "@fortawesome/pro-duotone-svg-icons";
+import { DuotoneIcon } from "@/components/duotone-icon";
 import {
   Sheet,
   SheetContent,
@@ -159,13 +161,15 @@ export function NutritionPanel({
   return (
     <Sheet open={open} onOpenChange={resetForOpen}>
       <SheetTrigger
-        render={<Button size="lg" className="min-h-12 w-full justify-center sm:w-auto" />}
+        render={<Button size="lg" className="min-h-12 w-full justify-center gap-2 sm:w-auto" />}
       >
+        <DuotoneIcon icon={faHatChef} className="h-4 w-4" aria-hidden />
         Cook with Sous
       </SheetTrigger>
       <SheetContent side="right" className="w-full sm:max-w-md">
         <SheetHeader>
-          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            <DuotoneIcon icon={faHatChef} className="h-3.5 w-3.5" aria-hidden />
             Chatting with Sous
           </p>
           <SheetTitle>{decodeHtmlEntities(recipeTitle)}</SheetTitle>
