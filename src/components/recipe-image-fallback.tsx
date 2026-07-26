@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faImage } from "@fortawesome/free-solid-svg-icons";
+import { faImage } from "@fortawesome/pro-duotone-svg-icons";
+import { DuotoneIcon } from "@/components/duotone-icon";
 import { cn } from "@/lib/utils";
 
 /** Route external recipe images through our server-side proxy to bypass hotlink protection. */
@@ -65,7 +65,7 @@ export function RecipeImageFallback({
       ) : null}
       {showPlaceholder ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
-          <FontAwesomeIcon
+          <DuotoneIcon
             icon={faImage}
             className={cn(iconSize[size], "text-muted-foreground/45")}
             aria-hidden
