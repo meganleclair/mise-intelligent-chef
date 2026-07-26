@@ -52,6 +52,10 @@ do $$ begin
   end if;
 end $$;
 
+-- Prevent importing the same recipe URL twice for the same user
+create unique index if not exists recipes_user_source_url_key
+  on public.recipes (user_id, source_url);
+
 -- Dismiss from “Recently imported” without deleting the recipe
 do $$ begin
   if not exists (

@@ -23,6 +23,17 @@ export async function importAndSaveRecipe(url: string) {
 
   const r = result.recipe;
 
+  const { data: existing } = await supabase
+    .from("recipes")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("source_url", r.sourceUrl)
+    .maybeSingle();
+
+  if (existing) {
+    return { ok: true as const, recipeId: existing.id, duplicate: true as const };
+  }
+
   // Replace adapter summary (often Spoonacular marketing copy) with a
   // Claude-written description grounded in the actual title and ingredients.
   const claudeSummary = await generateRecipeSummary(
@@ -48,9 +59,26 @@ export async function importAndSaveRecipe(url: string) {
     .select("id")
     .single();
 
-  if (error || !data) {
-    console.error("[importAndSaveRecipe] insert failed:", error?.message);
-    return { ok: false as const, error: error?.message ?? "Could not save recipe." };
+  if (error) {
+    // Unique violation on (user_id, source_url) — a concurrent import of the
+    // same URL won the race. Treat it the same as finding it up front.
+    if (error.code === "23505") {
+      const { data: existingAfterRace } = await supabase
+        .from("recipes")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("source_url", r.sourceUrl)
+        .maybeSingle();
+      if (existingAfterRace) {
+        return { ok: true as const, recipeId: existingAfterRace.id, duplicate: true as const };
+      }
+    }
+    console.error("[importAndSaveRecipe] insert failed:", error.message);
+    return { ok: false as const, error: error.message };
+  }
+
+  if (!data) {
+    return { ok: false as const, error: "Could not save recipe." };
   }
 
   revalidatePath("/");

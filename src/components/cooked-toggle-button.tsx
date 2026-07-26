@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { faUtensils } from "@fortawesome/pro-duotone-svg-icons";
 import { DuotoneIcon } from "@/components/duotone-icon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { setRecipeCooked } from "@/lib/actions/recipes";
 import { cn } from "@/lib/utils";
 
@@ -23,27 +24,31 @@ export function CookedToggleButton({ recipeId, initialCooked }: Props) {
     });
   }
 
+  const label = initialCooked ? "Mark as not yet cooked" : "Mark as cooked";
+
   return (
-    <button
-      type="button"
-      disabled={pending}
-      onClick={toggle}
-      aria-label={initialCooked ? "Mark as not yet cooked" : "Mark as cooked"}
-      title={initialCooked ? "Mark as not yet cooked" : "Mark as cooked"}
-      className={cn(
-        "flex h-8 w-8 shrink-0 items-center justify-center rounded transition-colors",
-        "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        pending && "opacity-50",
-      )}
-    >
-      <DuotoneIcon
-        icon={faUtensils}
+    <Tooltip>
+      <TooltipTrigger
+        type="button"
+        disabled={pending}
+        onClick={toggle}
+        aria-label={label}
         className={cn(
-          "h-4 w-4",
-          initialCooked ? "text-emerald-600" : "text-muted-foreground",
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded transition-colors",
+          "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          pending && "opacity-50",
         )}
-        aria-hidden
-      />
-    </button>
+      >
+        <DuotoneIcon
+          icon={faUtensils}
+          className={cn(
+            "h-4 w-4",
+            initialCooked ? "text-emerald-600" : "text-muted-foreground",
+          )}
+          aria-hidden
+        />
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
   );
 }

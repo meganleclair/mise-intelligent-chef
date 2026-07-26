@@ -78,8 +78,14 @@ function extractImageUrl(image: JsonLdRecipe["image"]): string | null {
 function extractServings(recipeYield: JsonLdRecipe["recipeYield"]): number {
   if (!recipeYield) return 4;
   const raw = Array.isArray(recipeYield) ? recipeYield[0] : recipeYield;
-  const num = parseInt(String(raw), 10);
-  return Number.isFinite(num) && num > 0 ? num : 4;
+  const text = String(raw);
+  const num = parseInt(text, 10);
+  if (!Number.isFinite(num) || num <= 0) return 4;
+  // Sites often encode yield as "1 loaf" / "1 batch" / "1 (9-inch) pie" —
+  // a literal 1 almost never means a single person serving, so treat it as
+  // unreliable unless the text explicitly says "serving".
+  if (num === 1 && !/serving/i.test(text)) return 4;
+  return num;
 }
 
 function stripHtml(html: string): string {
