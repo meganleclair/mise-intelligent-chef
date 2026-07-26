@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash } from "@fortawesome/pro-duotone-svg-icons";
+import { DuotoneIcon } from "@/components/duotone-icon";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +28,7 @@ export function PasswordInput({ id, className, ...props }: Props) {
         aria-label={visible ? "Hide password" : "Show password"}
         aria-pressed={visible}
       >
-        <FontAwesomeIcon
+        <DuotoneIcon
           icon={visible ? faEyeSlash : faEye}
           className="h-4 w-4"
           aria-hidden

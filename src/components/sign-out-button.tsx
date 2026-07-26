@@ -1,7 +1,7 @@
 "use client";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { faRightFromBracket } from "@fortawesome/pro-duotone-svg-icons";
+import { DuotoneIcon } from "@/components/duotone-icon";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function SignOutButton() {
@@ -17,7 +17,7 @@ export function SignOutButton() {
       onClick={() => void signOut()}
       className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
     >
-      <FontAwesomeIcon icon={faRightFromBracket} className="h-4 w-4" aria-hidden />
+      <DuotoneIcon icon={faRightFromBracket} className="h-4 w-4" aria-hidden />
       Sign out
     </button>
   );

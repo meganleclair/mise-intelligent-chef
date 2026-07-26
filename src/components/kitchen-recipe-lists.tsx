@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown, faMagnifyingGlass } from "@fortawesome/pro-duotone-svg-icons";
+import { DuotoneIcon } from "@/components/duotone-icon";
 import { KitchenFavoriteButton } from "@/components/kitchen-favorite-button";
 import { CookedToggleButton } from "@/components/cooked-toggle-button";
 import { RemoveFromRecentButton } from "@/components/remove-from-recent-button";
@@ -91,7 +91,7 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
 
       {hasAny ? (
         <div className="relative mb-8">
-          <FontAwesomeIcon
+          <DuotoneIcon
             icon={faMagnifyingGlass}
             className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
             aria-hidden
@@ -156,7 +156,7 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
                 onClick={() => setFavoritesLimit((n) => n + FAVORITES_PAGE)}
                 className="mt-3 flex w-full items-center justify-center gap-2 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                <FontAwesomeIcon icon={faChevronDown} className="h-3 w-3" aria-hidden />
+                <DuotoneIcon icon={faChevronDown} className="h-3 w-3" aria-hidden />
                 Show {Math.min(FAVORITES_PAGE, filteredFavorites.length - favoritesLimit)} more
               </button>
             ) : null}
@@ -223,7 +223,7 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
               onClick={() => setRecentLimit((n) => n + RECENT_PAGE)}
               className="mt-3 flex w-full items-center justify-center gap-2 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              <FontAwesomeIcon icon={faChevronDown} className="h-3 w-3" aria-hidden />
+              <DuotoneIcon icon={faChevronDown} className="h-3 w-3" aria-hidden />
               Show {Math.min(RECENT_PAGE, filteredRecent.length - recentLimit)} more
             </button>
           ) : null}

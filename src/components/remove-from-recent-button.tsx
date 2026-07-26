@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faXmark } from "@fortawesome/pro-duotone-svg-icons";
+import { DuotoneIcon } from "@/components/duotone-icon";
 import { dismissRecipeFromRecentImports } from "@/lib/actions/recipes";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -50,7 +50,7 @@ export function RemoveFromRecentButton({ recipeId, recipeTitle, className }: Pro
         aria-label={`Remove ${recipeTitle} from recently imported`}
         title="Remove from recently imported"
       >
-        <FontAwesomeIcon icon={faXmark} className="h-4 w-4" aria-hidden />
+        <DuotoneIcon icon={faXmark} className="h-4 w-4" aria-hidden />
       </Button>
       {error ? (
         <p className="max-w-[12rem] text-right text-xs text-destructive" role="alert">

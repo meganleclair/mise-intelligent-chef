@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faTrash } from "@fortawesome/pro-duotone-svg-icons";
+import { DuotoneIcon } from "@/components/duotone-icon";
 import { deleteRecipe } from "@/lib/actions/recipes";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -50,7 +50,7 @@ export function DeleteRecipeButton({ recipeId, recipeTitle, className }: Props) 
         aria-label={`Delete ${recipeTitle}`}
         title="Remove recipe"
       >
-        <FontAwesomeIcon icon={faTrash} className="h-4 w-4" aria-hidden />
+        <DuotoneIcon icon={faTrash} className="h-4 w-4" aria-hidden />
       </Button>
       {error ? (
         <p className="max-w-[12rem] text-right text-xs text-destructive" role="alert">

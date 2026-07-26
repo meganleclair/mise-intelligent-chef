@@ -2,9 +2,9 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar as faStarSolid } from "@fortawesome/free-solid-svg-icons";
-import { faStar as faStarOutline } from "@fortawesome/free-regular-svg-icons";
+import { faStar as faStarSolid } from "@fortawesome/pro-duotone-svg-icons";
+import { faStar as faStarOutline } from "@fortawesome/pro-duotone-svg-icons";
+import { DuotoneIcon } from "@/components/duotone-icon";
 import { setRecipeFavorite } from "@/lib/actions/recipes";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +37,7 @@ export function KitchenFavoriteButton({ recipeId, initialFavorite }: Props) {
         pending && "opacity-50",
       )}
     >
-      <FontAwesomeIcon
+      <DuotoneIcon
         icon={initialFavorite ? faStarSolid : faStarOutline}
         className={cn(
           "h-4 w-4",

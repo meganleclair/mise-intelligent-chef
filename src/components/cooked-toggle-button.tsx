@@ -2,8 +2,8 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUtensils } from "@fortawesome/free-solid-svg-icons";
+import { faUtensils } from "@fortawesome/pro-duotone-svg-icons";
+import { DuotoneIcon } from "@/components/duotone-icon";
 import { setRecipeCooked } from "@/lib/actions/recipes";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +36,7 @@ export function CookedToggleButton({ recipeId, initialCooked }: Props) {
         pending && "opacity-50",
       )}
     >
-      <FontAwesomeIcon
+      <DuotoneIcon
         icon={faUtensils}
         className={cn(
           "h-4 w-4",

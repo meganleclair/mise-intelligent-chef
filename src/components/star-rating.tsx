@@ -1,7 +1,7 @@
 "use client";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar } from "@fortawesome/pro-duotone-svg-icons";
+import { DuotoneIcon } from "@/components/duotone-icon";
 import { cn } from "@/lib/utils";
 
 type Size = "sm" | "md";
@@ -26,7 +26,7 @@ export function StarRatingDisplay({
       aria-label={`${value} out of 5 stars`}
     >
       {[1, 2, 3, 4, 5].map((n) => (
-        <FontAwesomeIcon
+        <DuotoneIcon
           key={n}
           icon={faStar}
           className={cn(
@@ -74,7 +74,7 @@ export function StarRatingInput({
             aria-pressed={active}
             aria-label={`${n} star${n === 1 ? "" : "s"}`}
           >
-            <FontAwesomeIcon
+            <DuotoneIcon
               icon={faStar}
               className={cn(sizeClass[size])}
               aria-hidden

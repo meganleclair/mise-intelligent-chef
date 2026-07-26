@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHouse, faUtensils } from "@fortawesome/free-solid-svg-icons";
+import { faHouse, faUtensils } from "@fortawesome/pro-duotone-svg-icons";
+import { DuotoneIcon } from "@/components/duotone-icon";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/sign-out-button";
 
@@ -21,14 +21,14 @@ export async function EditorialHeader() {
             href="/"
             className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
           >
-            <FontAwesomeIcon icon={faHouse} className="h-4 w-4" aria-hidden />
+            <DuotoneIcon icon={faHouse} className="h-4 w-4" aria-hidden />
             Home
           </Link>
           <Link
             href="/kitchen"
             className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
           >
-            <FontAwesomeIcon icon={faUtensils} className="h-4 w-4" aria-hidden />
+            <DuotoneIcon icon={faUtensils} className="h-4 w-4" aria-hidden />
             My kitchen
           </Link>
           {user ? (
