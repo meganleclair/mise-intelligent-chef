@@ -11,7 +11,7 @@ export async function EditorialHeader() {
   } = await supabase.auth.getUser();
 
   return (
-    <header className="border-b border-border/80 bg-background/90 backdrop-blur-sm">
+    <header className="border-b border-border bg-muted backdrop-blur-sm">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-5">
         <Link href="/" className="font-wordmark text-xl tracking-tight text-text-heading">
           Mise
@@ -19,14 +19,14 @@ export async function EditorialHeader() {
         <nav className="flex items-center gap-6 text-sm text-muted-foreground">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
+            className="inline-flex items-center gap-2 transition-colors hover:text-accent-teal"
           >
             <DuotoneIcon icon={faHouse} className="h-4 w-4" aria-hidden />
             Home
           </Link>
           <Link
             href="/kitchen"
-            className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
+            className="inline-flex items-center gap-2 transition-colors hover:text-accent-teal"
           >
             <DuotoneIcon icon={faUtensils} className="h-4 w-4" aria-hidden />
             My kitchen

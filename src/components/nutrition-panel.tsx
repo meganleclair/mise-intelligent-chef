@@ -297,7 +297,7 @@ export function NutritionPanel({
                       key={i}
                       className={
                         m.role === "user"
-                          ? "ml-auto max-w-[85%] rounded-lg bg-primary/10 px-3 py-2 text-sm"
+                          ? "ml-auto max-w-[85%] rounded-lg bg-accent-teal/10 px-3 py-2 text-sm"
                           : "mr-auto max-w-[85%] rounded-lg bg-muted px-3 py-2 text-sm"
                       }
                     >

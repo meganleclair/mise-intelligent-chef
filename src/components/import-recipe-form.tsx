@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-export function ImportRecipeForm() {
+type Props = { dark?: boolean };
+
+export function ImportRecipeForm({ dark = false }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +35,10 @@ export function ImportRecipeForm() {
       className="flex flex-col gap-3 sm:flex-row sm:items-end"
     >
       <div className="flex-1 space-y-2">
-        <Label htmlFor="recipe-url" className="text-sm text-muted-foreground">
+        <Label
+          htmlFor="recipe-url"
+          className={cn("text-sm", dark ? "text-background/70" : "text-muted-foreground")}
+        >
           Recipe URL
         </Label>
         <Input

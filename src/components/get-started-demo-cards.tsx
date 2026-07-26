@@ -35,7 +35,7 @@ export function GetStartedDemoCards() {
                     className="absolute inset-0 h-full w-full"
                     size="sm"
                   />
-                  <span className="absolute left-3 top-3 rounded-md bg-background/90 px-2 py-1 text-xs font-medium text-text-heading shadow-sm">
+                  <span className="absolute left-3 top-3 rounded-md border border-accent-teal/50 bg-background/90 px-2 py-1 text-xs font-medium text-text-heading">
                     {c.badge}
                   </span>
                 </div>

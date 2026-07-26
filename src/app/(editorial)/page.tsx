@@ -120,19 +120,20 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="relative mt-28 border-t border-border pt-16 text-center">
-        <DecorativeSwirl className="pointer-events-none absolute -top-4 right-6 h-28 w-28 rotate-12" />
+      <section className="relative mt-28 overflow-hidden rounded-2xl bg-foreground px-6 py-16 text-center sm:px-10">
+        <DecorativeSwirl className="pointer-events-none absolute -top-4 right-6 h-28 w-28 rotate-12 text-accent-teal/25" />
+        <DecorativeSwirl className="pointer-events-none absolute -bottom-10 -left-8 h-32 w-32 -rotate-12 text-accent-teal/15" />
         <div className="mx-auto max-w-md space-y-2">
-          <p className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="flex items-center justify-center gap-2 text-xs uppercase tracking-[0.2em] text-accent-yellow">
             <DuotoneIcon icon={faDownload} className="h-3.5 w-3.5" aria-hidden />
             Get started
           </p>
-          <h2 className="font-heading text-2xl text-text-heading">
+          <h2 className="font-heading text-2xl text-background">
             Import a recipe URL.
           </h2>
         </div>
         <div className="mx-auto mt-6 max-w-md">
-          <ImportRecipeForm />
+          <ImportRecipeForm dark />
         </div>
       </section>
 
