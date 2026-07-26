@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { faChevronDown, faMagnifyingGlass } from "@fortawesome/pro-duotone-svg-icons";
 import { DuotoneIcon } from "@/components/duotone-icon";
+import { DecorativeSwirl } from "@/components/decorative-swirl";
 import { KitchenFavoriteButton } from "@/components/kitchen-favorite-button";
 import { CookedToggleButton } from "@/components/cooked-toggle-button";
 import { RemoveFromRecentButton } from "@/components/remove-from-recent-button";
@@ -170,11 +171,14 @@ export function KitchenRecipeLists({ recent, favorites, isLoggedIn }: Props) {
           Recently Imported
         </h2>
         {recent.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {isLoggedIn
-              ? "Nothing here yet—import a recipe above."
-              : "Sign in to load recipes you've imported."}
-          </p>
+          <div className="relative overflow-hidden rounded-xl border border-border bg-muted/20 px-6 py-10 text-center">
+            <DecorativeSwirl className="pointer-events-none absolute -top-8 left-1/2 h-40 w-40 -translate-x-1/2" />
+            <p className="relative text-sm text-muted-foreground">
+              {isLoggedIn
+                ? "Nothing here yet—import a recipe above."
+                : "Sign in to load recipes you've imported."}
+            </p>
+          </div>
         ) : filteredRecent.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             Nothing here for this filter.

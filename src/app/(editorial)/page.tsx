@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { faHatChef } from "@fortawesome/pro-duotone-svg-icons";
 import { DuotoneIcon } from "@/components/duotone-icon";
+import { DecorativeSwirl } from "@/components/decorative-swirl";
 import { ImportRecipeForm } from "@/components/import-recipe-form";
 import { RecentImportsCards } from "@/components/recent-imports-cards";
 import { getRecentImports } from "@/lib/data/queries";
@@ -19,7 +20,8 @@ export default async function HomePage() {
 
   return (
     <div className="mx-auto max-w-5xl px-6 pb-20 pt-10">
-      <section className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-14">
+      <section className="relative grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-14">
+        <DecorativeSwirl className="pointer-events-none absolute -top-10 right-10 h-44 w-44" />
         <div className="space-y-6">
           <p className="font-wordmark text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Mise
@@ -56,7 +58,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mt-20 rounded-2xl border border-border bg-muted/20 px-6 py-10 sm:px-10">
+      <section className="relative mt-20 overflow-hidden rounded-2xl border border-border bg-muted/20 px-6 py-10 sm:px-10">
+        <DecorativeSwirl className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56" />
         <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-14">
           <div className="space-y-4">
             <p className="font-wordmark flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
