@@ -36,8 +36,8 @@ yarn-error.log*
 # vercel
 .vercel
 
-# Font Awesome Pro npm auth token — never commit
-.npmrc
+# .npmrc is committed on purpose — it only references the
+# FONTAWESOME_NPM_AUTH_TOKEN env var, never the literal secret
 
 # brainstorming visual companion
 .superpowers/
